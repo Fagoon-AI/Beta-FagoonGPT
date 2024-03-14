@@ -27,7 +27,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-5">
           <span className="text-xl">You Might Want To Try</span>
-          <div className="flex overflow-x-auto max-w-[619px] scrollbar-none">
+          <div className="flex overflow-x-auto max-w-full scrollbar-none">
             <div className="flex items-center justify-between gap-3">
               <TextBox label="Write a poem">
                 <PoemIcon />

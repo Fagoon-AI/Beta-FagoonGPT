@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "w-fit mx-auto dark")}>
+      <body className={cn(inter.className, "lg:w-[50%] w-[75%] mx-auto dark")}>
         {children}
       </body>
     </html>
