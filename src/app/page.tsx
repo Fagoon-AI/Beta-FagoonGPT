@@ -20,7 +20,7 @@ export default function Home() {
           </h1>
           <div className="flex flex-col gap-1">
             <h1 className="text-5xl bg-gradient-to-r from-[#4285F4] via-[#9B72CB] via-[#D96570] via-[#D96570] via-[#9B72CB] via-[#4285F4] via-[#9B72CB] via-[#D96570] to-[#131314] bg-clip-text text-transparent">
-              Hello, ashbin
+              Hello, this is FagoonGPT
             </h1>
             <h2 className="text-5xl">How can I help you today?</h2>
           </div>
