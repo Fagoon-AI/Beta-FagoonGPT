@@ -1,8 +1,9 @@
-export default function SearchIcon() {
+import { IconProps } from "@/types/IconProps";
+
+export default function SearchIcon({ ...props }: IconProps) {
   return (
     <svg
-      width="20"
-      height="20"
+      {...props}
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

@@ -1,8 +1,9 @@
-export default function RecipeIcon() {
+import { IconProps } from "@/types/IconProps";
+
+export default function RecipeIcon({ ...props }: IconProps) {
   return (
     <svg
-      width="41"
-      height="40"
+      {...props}
       viewBox="0 0 41 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

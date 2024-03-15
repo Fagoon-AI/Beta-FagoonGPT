@@ -1,12 +1,8 @@
-interface IChatIconProps {
-  className?: string;
-}
+import { IconProps } from "@/types/IconProps";
 
-export default function FilesIcon({ ...props }: IChatIconProps) {
+export default function FilesIcon({ ...props }: IconProps) {
   return (
     <svg
-      width="31"
-      height="32"
       viewBox="0 0 31 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
