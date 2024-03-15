@@ -13,8 +13,8 @@ export default function ChatInput() {
     px-4 rounded-3xl"
     >
       <SearchIcon
-        width={isSmallDevice ? "16" : "32"}
-        height={isSmallDevice ? "16" : "32"}
+        width={isSmallDevice ? "16" : "24"}
+        height={isSmallDevice ? "16" : "24"}
       />
       <input
         className="flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
