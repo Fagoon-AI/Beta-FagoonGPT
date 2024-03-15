@@ -18,8 +18,8 @@ export default function ChatPage() {
   const iconSize = isSmallDevice ? "28" : "40";
   return (
     <main className="flex flex-col py-7 justify-between md:h-screen h-fit">
-      <div className="flex flex-col gap-8 overflow-y-auto scrollbar-none mb-4">
-        <div className="flex flex-col gap-8">
+      <div className="flex flex-col md:gap-8 gap-6 overflow-y-auto scrollbar-none mb-4">
+        <div className="flex flex-col md:gap-8 gap-6">
           <h1 className="md:text-2xl text-xl bg-gradient-to-br from-[#B664DB] via-[#DDDDDD] to-[#FF3F9B] bg-clip-text text-transparent">
             Fagoon
           </h1>

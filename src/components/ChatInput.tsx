@@ -10,7 +10,7 @@ export default function ChatInput() {
   return (
     <div
       className="flex items-center bg-[#1C1F28] py-3 md:px-8
-    px-4 rounded-3xl"
+    px-4 rounded-3xl fixed bottom-4 w-[85%] sm:w-[50%]"
     >
       <SearchIcon
         width={isSmallDevice ? "16" : "24"}

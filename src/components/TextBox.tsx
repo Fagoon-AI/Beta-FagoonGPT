@@ -15,7 +15,7 @@ export default function TextBox({ children, label }: TextBoxProps) {
     );
 
   return (
-    <div className="w-full bg-[#2b2b30] px-4 md:py-3 py-2 rounded-2xl hover:bg-[#3d3d42] transition-colors duration-300 cursor-pointer md:text-sm text-xs">
+    <div className="w-full bg-[#2b2b30] px-4 py-3 rounded-2xl hover:bg-[#3d3d42] transition-colors duration-300 cursor-pointer md:text-sm text-xs">
       {label}
     </div>
   );
