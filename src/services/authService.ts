@@ -1,5 +1,6 @@
 import { LoginFormValues } from "@/app/login/page";
 import { SignupFormValues } from "@/app/signup/page";
+import { getCurrentUserData, refreshTokenData } from "@/types/authServiceType";
 import axios, { AxiosResponse } from "axios";
 
 const API_BASE_URL = "https://endpoints.fagoondigital.com";
@@ -19,7 +20,7 @@ export const login = async (credentials: LoginFormValues) => {
   return await axios.post(`${API_BASE_URL}/auth/login`, credentials);
 };
 
-export const refreshToken = async (refreshToken: SignupFormValues) => {
+export const refreshTokenAPI = async ({ refreshToken }: refreshTokenData) => {
   const response = await axios.post(`${API_BASE_URL}/auth/refresh`, null, {
     headers: {
       Authorization: `Bearer ${refreshToken}`,
@@ -28,11 +29,12 @@ export const refreshToken = async (refreshToken: SignupFormValues) => {
   return response.data;
 };
 
-export const getCurrentUser = async (accessToken: SignupFormValues) => {
-  const response = await axios.get(`${API_BASE_URL}/user/current`, {
+export const getCurrentUserAPI = async ({
+  accessToken,
+}: getCurrentUserData) => {
+  return await axios.get(`${API_BASE_URL}/user/current`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  return response.data;
 };

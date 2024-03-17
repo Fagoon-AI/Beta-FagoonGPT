@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Showcase from "./showcase";
 import FilesIcon from "../icons/Files";
 import MicIcon from "../icons/Mic";
@@ -16,6 +16,15 @@ export default function ChatPage() {
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const isSmallDevice = useSmallDevices();
+
+  const conversationContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (conversationContainerRef.current) {
+      conversationContainerRef.current.scrollTop =
+        conversationContainerRef.current.scrollHeight;
+    }
+  }, [conversation]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
@@ -58,22 +67,22 @@ export default function ChatPage() {
       {conversation.length === 0 ? (
         <Showcase handleSubmit={handleSubmit} />
       ) : (
-        <div className="flex flex-col gap-4 p-4 overflow-y-auto scrollbar-none mb-16">
+        <div
+          className="flex flex-col gap-5 md:p-4 overflow-y-auto scrollbar-none mb-16"
+          ref={conversationContainerRef}
+        >
           {conversation.map((chat, index) => (
-            <div key={index} className="flex gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-500"></div>
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col gap-1 bg-gray-700 p-4 rounded-lg">
-                  <span className="text-white font-semibold">You:</span>
-                  <span className="text-white">{chat.prompt}</span>
-                </div>
-                {chat.response && (
-                  <div className="flex flex-col gap-1 bg-blue-600 p-4 rounded-lg">
-                    <span className="text-white font-semibold">Fagoon:</span>
-                    <span className="text-white">{chat.response}</span>
-                  </div>
-                )}
+            <div key={index} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1 bg-white md:p-4 p-3 rounded-lg">
+                <span className="text-black font-semibold">You:</span>
+                <span className="text-black">{chat.prompt}</span>
               </div>
+              {chat.response && (
+                <div className="flex flex-col gap-1 bg-[#333337] p-4 rounded-lg">
+                  <span className="text-white font-semibold">Fagoon:</span>
+                  <span className="text-white">{chat.response}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>

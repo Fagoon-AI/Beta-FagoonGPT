@@ -9,6 +9,10 @@ import RecipeIcon from "../icons/Recipe";
 import SolveIcon from "../icons/Solve";
 import SummarizeIcon from "../icons/Summarize";
 import TranslateIcon from "../icons/Translate";
+import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
+import { getCurrentUserAPI, refreshTokenAPI } from "@/services/authService";
+import { redirect } from "next/navigation";
 
 interface IShowcaseProps {
   handleSubmit: (prompt?: string) => void;
@@ -17,6 +21,58 @@ interface IShowcaseProps {
 export default function Showcase({ handleSubmit }: IShowcaseProps) {
   const isSmallDevice = useSmallDevices();
   const iconSize = isSmallDevice ? "28" : "40";
+  const [username, setUsername] = useState<string>("");
+
+  const getCurrentUser = async (accessToken: string) => {
+    try {
+      const response = await getCurrentUserAPI({ accessToken });
+      setUsername(response.data.username);
+      return response.data;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        return await handleUnauthorizedError(accessToken);
+      }
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const handleUnauthorizedError = async (accessToken: string) => {
+    const refreshToken = JSON.parse(localStorage.getItem("refreshToken")!);
+    if (!refreshToken) {
+      return redirect("/login");
+    }
+
+    try {
+      const response = await refreshTokenAPI({ refreshToken });
+      const { access_token, refresh_token } = response.data;
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("refreshToken", refresh_token);
+      const userData = await getCurrentUserAPI(access_token);
+      console.log(userData);
+      return userData;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        return redirect("/login");
+      }
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const isUnauthorizedError = (error: unknown) => {
+    return error instanceof AxiosError && error.response?.status === 401;
+  };
+
+  useEffect(() => {
+    const accessToken = JSON.parse(localStorage.getItem("accessToken")!);
+    if (accessToken) {
+      getCurrentUser(accessToken);
+    } else {
+      redirect("/login");
+    }
+  }, []);
+
   return (
     <div className="flex flex-col md:gap-8 gap-6 overflow-y-auto scrollbar-none mb-4">
       <div className="flex flex-col md:gap-8 gap-6">
@@ -24,9 +80,11 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
           Fagoon
         </h1>
         <div className="flex flex-col gap-1">
-          <h1 className="md:text-5xl text-2xl bg-gradient-to-r from-[#4285F4] via-[#9B72CB] via-[#D96570] via-[#D96570] via-[#9B72CB] via-[#4285F4] via-[#9B72CB] via-[#D96570] to-[#131314] bg-clip-text text-transparent">
-            Hello, this is FagoonGPT
-          </h1>
+          {username !== "" && (
+            <h1 className="md:text-5xl text-2xl bg-gradient-to-r from-[#4285F4] via-[#9B72CB] via-[#D96570] via-[#D96570] via-[#9B72CB] via-[#4285F4] via-[#9B72CB] via-[#D96570] to-[#131314] bg-clip-text text-transparent">
+              Hello, {username}
+            </h1>
+          )}
           <h2 className="md:text-5xl text-2xl">How can I help you today?</h2>
         </div>
       </div>
