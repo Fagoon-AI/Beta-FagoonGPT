@@ -113,7 +113,7 @@ export default function LoginPage() {
         </form>
       </Form>
       <p className="mt-4 text-sm">
-        Don't have an account ?{" "}
+        Don&apos;t have an account ?{" "}
         <span
           className="text-blue-200 hover:cursor-pointer"
           onClick={() => router.push("/signup")}
