@@ -6,6 +6,7 @@ import MicIcon from "../icons/Mic";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
 import axios from "axios";
 import SearchIcon from "../icons/Search";
+import Navbar from "../ui/nav";
 
 export interface ChatMessage {
   prompt: string;
@@ -79,12 +80,16 @@ export default function ChatPage() {
       conversationContainerRef.current.scrollTop =
         conversationContainerRef.current.scrollHeight;
     }
+
+    // Scroll to the bottom of the page
+    window.scrollTo(0, document.body.scrollHeight + 200); // Adjust the scroll amount as needed
   };
 
   const iconSize = isSmallDevice ? "24" : "32";
 
   return (
     <main className="flex flex-col justify-between min-h-screen">
+      <Navbar />
       <div className="flex flex-col flex-1 overflow-y-auto py-4 px-6">
         {conversation.length === 0 ? (
           <Showcase handleSubmit={handleSubmit} />
