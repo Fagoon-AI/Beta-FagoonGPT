@@ -12,7 +12,7 @@ import TranslateIcon from "../icons/Translate";
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { getCurrentUserAPI, refreshTokenAPI } from "@/services/authService";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 interface IShowcaseProps {
   handleSubmit: (prompt?: string) => void;
@@ -22,6 +22,8 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
   const isSmallDevice = useSmallDevices();
   const iconSize = isSmallDevice ? "28" : "40";
   const [username, setUsername] = useState<string>("");
+
+  const router = useRouter();
 
   const getCurrentUser = async (accessToken: string) => {
     try {
@@ -38,38 +40,51 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
   };
 
   const handleUnauthorizedError = async (accessToken: string) => {
-    const refreshToken = JSON.parse(localStorage.getItem("refreshToken")!);
-    if (!refreshToken) {
+    let refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken || refreshToken === "undefined" || refreshToken === "") {
+      localStorage.setItem("accessToken", "");
+      localStorage.setItem("refreshToken", "");
       return redirect("/login");
     }
-
+    refreshToken = JSON.parse(refreshToken);
+    console.log(refreshToken);
     try {
-      const response = await refreshTokenAPI({ refreshToken });
+      const response = await refreshTokenAPI({ refreshToken } as {
+        refreshToken: string;
+      });
+      console.log(response.data);
       const { access_token, refresh_token } = response.data;
-      localStorage.setItem("accessToken", access_token);
-      localStorage.setItem("refreshToken", refresh_token);
-      const userData = await getCurrentUserAPI(access_token);
-      console.log(userData);
-      return userData;
+      localStorage.setItem("accessToken", JSON.stringify(access_token));
+      localStorage.setItem("refreshToken", JSON.stringify(refresh_token));
+      const userData = await getCurrentUserAPI({ accessToken: access_token });
+      console.log(userData.data);
+      return userData.data;
     } catch (error) {
       if (isUnauthorizedError(error)) {
-        return redirect("/login");
+        localStorage.setItem("accessToken", "");
+        localStorage.setItem("refreshToken", "");
+        router.push("/login");
+        router.refresh();
+        return null;
       }
       console.log(error);
-      throw error;
     }
   };
 
   const isUnauthorizedError = (error: unknown) => {
-    return error instanceof AxiosError && error.response?.status === 401;
+    return (
+      (error instanceof AxiosError && error.response?.status === 401) || 404
+    );
   };
 
   useEffect(() => {
-    const accessToken = JSON.parse(localStorage.getItem("accessToken")!);
-    if (accessToken) {
-      getCurrentUser(accessToken);
-    } else {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken || accessToken === "undefined" || accessToken === "") {
+      localStorage.setItem("accessToken", "");
+      localStorage.setItem("refreshToken", "");
       redirect("/login");
+    } else {
+      getCurrentUser(JSON.parse(accessToken));
     }
   }, []);
 

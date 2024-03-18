@@ -6,7 +6,7 @@ import { useEffect } from "react";
 export default function Home() {
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken || accessToken === "undefined") {
+    if (!accessToken || accessToken === "undefined" || accessToken === "") {
       return redirect("/login");
     }
   }, []);

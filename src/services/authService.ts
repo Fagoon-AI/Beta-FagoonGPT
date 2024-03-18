@@ -21,12 +21,11 @@ export const login = async (credentials: LoginFormValues) => {
 };
 
 export const refreshTokenAPI = async ({ refreshToken }: refreshTokenData) => {
-  const response = await axios.post(`${API_BASE_URL}/auth/refresh`, null, {
+  return await axios.get(`${API_BASE_URL}/auth/refresh`, {
     headers: {
       Authorization: `Bearer ${refreshToken}`,
     },
   });
-  return response.data;
 };
 
 export const getCurrentUserAPI = async ({
