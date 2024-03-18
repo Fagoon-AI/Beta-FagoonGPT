@@ -11,15 +11,12 @@ export default function Navbar() {
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev); // Toggle the value of isMenuOpen
+    setIsMenuOpen((prev) => !prev);
   };
 
   return (
     <div className="relative h-100vh">
-      {" "}
-      {/* Set container height */}
-      {/* Hamburger menu */}
-      <div className="fixed top-4 left-4 z-10" onClick={toggleMenu}>
+      <div className="fixed top-4 left-4 z-10 w-full" onClick={toggleMenu}>
         <svg
           className="w-6 h-6 cursor-pointer"
           fill="none"
@@ -35,8 +32,8 @@ export default function Navbar() {
           />
         </svg>
       </div>
-      {/* Sidebar */}
-      {isMenuOpen && ( // Render sidebar if isMenuOpen is true
+
+      {isMenuOpen && (
         <div className="fixed top-0 left-0 z-10 w-64 h-full bg-gray-800">
           <div className="flex items-center justify-between h-16 bg-gray-900">
             <h1 className="text-2xl p-4 font-bold text-white">Fagoon</h1>

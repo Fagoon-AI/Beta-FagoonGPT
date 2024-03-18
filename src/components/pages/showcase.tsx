@@ -10,7 +10,7 @@ import SolveIcon from "../icons/Solve";
 import SummarizeIcon from "../icons/Summarize";
 import TranslateIcon from "../icons/Translate";
 import { useEffect, useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { getCurrentUserAPI, refreshTokenAPI } from "@/services/authService";
 import { redirect, useRouter } from "next/navigation";
 
@@ -89,7 +89,7 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
   }, []);
 
   return (
-    <div className="flex flex-col md:gap-8 gap-6 overflow-y-auto scrollbar-none mb-4">
+    <div className="flex flex-col md:gap-8 gap-6 overflow-y-auto scrollbar-none mb-4 w-[90%] mx-auto">
       <div className="flex flex-col md:gap-8 gap-6">
         <h1 className="md:text-2xl text-xl bg-gradient-to-br from-[#B664DB] via-[#DDDDDD] to-[#FF3F9B] bg-clip-text text-transparent">
           Fagoon
