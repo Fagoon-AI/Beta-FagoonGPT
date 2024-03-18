@@ -15,6 +15,7 @@ export interface ChatMessage {
 export default function ChatPage() {
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
+  const [loading, setLoading] = useState(false);
   const isSmallDevice = useSmallDevices();
 
   const conversationContainerRef = useRef<HTMLDivElement | null>(null);
@@ -45,6 +46,14 @@ export default function ChatPage() {
     }
     setConversation((prev) => [...prev, newChat]);
     setInputText("");
+    setLoading(true);
+
+    // Close the keyboard on mobile devices
+    const inputElement = document.getElementById("chatInput");
+    if (inputElement) {
+      inputElement.blur();
+    }
+
     try {
       const response = await axios.post(
         "https://chat.fagoondigital.com/api/prompt/",
@@ -54,58 +63,90 @@ export default function ChatPage() {
       );
       newChat.response = response.data.response;
 
-      setConversation((prev) => [...prev.slice(0, -1), newChat]);
+      // Update the conversation state with the new response
+      setConversation((prev) => [
+        ...prev.slice(0, -1), // Remove the last message (user's input)
+        newChat, // Add the new message (user's input)
+        { prompt: response.data.response, response: null }, // Add a new message for Fagoon's response
+      ]);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
+    }
+
+    if (conversationContainerRef.current) {
+      conversationContainerRef.current.scrollTop =
+        conversationContainerRef.current.scrollHeight;
     }
   };
 
   const iconSize = isSmallDevice ? "24" : "32";
 
   return (
-    <main className="flex flex-col py-3 justify-between md:h-screen h-fit">
-      {conversation.length === 0 ? (
-        <Showcase handleSubmit={handleSubmit} />
-      ) : (
-        <div
-          className="flex flex-col gap-5 md:p-4 overflow-y-auto scrollbar-none mb-16"
-          ref={conversationContainerRef}
-        >
-          {conversation.map((chat, index) => (
-            <div key={index} className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1 bg-white md:p-4 p-3 rounded-lg">
-                <span className="text-black font-semibold">You:</span>
-                <span className="text-black">{chat.prompt}</span>
-              </div>
-              {chat.response && (
-                <div className="flex flex-col gap-1 bg-[#333337] p-4 rounded-lg">
-                  <span className="text-white font-semibold">Fagoon:</span>
-                  <span className="text-white">{chat.response}</span>
+    <main className="flex flex-col justify-between min-h-screen">
+      <div className="flex flex-col flex-1 overflow-y-auto py-4 px-6">
+        {conversation.length === 0 ? (
+          <Showcase handleSubmit={handleSubmit} />
+        ) : (
+          <div
+            ref={conversationContainerRef}
+            className="space-y-4"
+            style={{
+              minHeight: "calc(100% - 60px)",
+              overflowY: "hidden", // Hide scrollbar
+              marginBottom: "80px", // Adjusted to make space for input box
+            }}
+          >
+            {conversation.map((chat, index) => (
+              <div key={index} className="flex flex-col space-y-2">
+                <div
+                  className={`flex flex-col ${
+                    chat.response ? "items-end" : "items-start"
+                  } ${
+                    !chat.response
+                      ? "bg-gray-800 text-white"
+                      : "bg-gray-200 text-gray-800"
+                  } p-4 rounded-md`}
+                  style={{
+                    marginLeft: chat.response ? "50px" : "0", // Add margin to the right for responses
+                    marginRight: !chat.response ? "50px" : "0", // Add margin to the left for user messages
+                  }}
+                >
+                  <span className="font-semibold">
+                    {chat.response ? "You:" : "Fagoon:"}
+                  </span>
+                  <span>{chat.prompt}</span>
+                  {loading &&
+                    !chat.response &&
+                    index === conversation.length - 1 && (
+                      <div className="flex justify-end">
+                        <div className="loader"></div>
+                      </div>
+                    )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div
         className="flex items-center bg-[#1C1F28] py-3 md:px-8
         px-4 rounded-3xl fixed bottom-4 w-[85%] sm:w-[50%]"
       >
-        <SearchIcon
-          width={isSmallDevice ? "16" : "24"}
-          height={isSmallDevice ? "16" : "24"}
-        />
+        <SearchIcon width={iconSize} height={iconSize} />
         <input
+          id="chatInput"
           className="flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
           type="text"
-          placeholder="What are you looking for?"
+          placeholder="Ask me anything..."
           value={inputText}
           onChange={handleInputChange}
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSubmit();
           }}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center space-x-4">
           <FilesIcon
             className="cursor-pointer"
             width={iconSize}
