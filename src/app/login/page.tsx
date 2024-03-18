@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { login, signup } from "@/services/authService";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useEffect } from "react";
@@ -43,7 +43,7 @@ export default function LoginPage() {
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
-      redirect("/");
+      router.push("/");
     }
   }, []);
 
@@ -59,68 +59,70 @@ export default function LoginPage() {
           "refreshToken",
           JSON.stringify(response.data.refresh_token)
         );
+        router.push("/");
       }
-      router.push("/");
-      router.refresh();
     } catch (error) {
       if (error instanceof AxiosError)
         toast.error(error?.response?.data?.message);
     }
   }
+
   return (
-    <div className="flex flex-col justify-center py-5">
-      <h1 className="md:text-2xl text-xl bg-gradient-to-br from-[#B664DB] via-[#DDDDDD] to-[#FF3F9B] bg-clip-text text-transparent">
-        Fagoon
-      </h1>
-      <h2 className="mt-4 text-2xl">Login to your account</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-8">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Submit</Button>
-        </form>
-      </Form>
-      <p className="mt-4 text-sm">
-        Don&apos;t have an account ?{" "}
-        <span
-          className="text-blue-200 hover:cursor-pointer"
-          onClick={() => router.push("/signup")}
-        >
-          Signup
-        </span>
-      </p>
+    <div className="flex justify-center items-center h-screen">
+      <div className="w-full max-w-md p-6 bg-transparent rounded-lg shadow-lg">
+        <h1 className="md:text-2xl text-xl bg-gradient-to-br from-[#B664DB] via-[#DDDDDD] to-[#FF3F9B] bg-clip-text text-transparent">Fagoon</h1>
+        <h2 className="mt-4 text-2xl">
+          Login to your account
+        </h2>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-8">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Enter your password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
+        <p className="mt-4 text-sm text-center">
+          Don&apos;t have an account?{" "}
+          <span
+            className="text-blue-200 hover:cursor-pointer"
+            onClick={() => router.push("/signup")}
+          >
+            Signup
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
