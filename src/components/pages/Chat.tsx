@@ -66,11 +66,11 @@ export default function ChatPage() {
   return (
     <>
       <Navbar />
-      <main className="flex mt-12 flex-col justify-between md:h-screen h-fit">
+      <main className="flex mt-14 flex-col justify-between md:h-screen h-fit ">
         {conversation.length === 0 ? (
           <Showcase handleSubmit={handleSubmit} />
         ) : (
-          <div className="flex flex-col gap-6 overflow-y-auto scrollbar-none h-[calc(100vh-124px)]">
+          <div className="flex flex-col gap-6 overflow-y-auto scrollbar-none h-[calc(100dvh-124px)]">
             {conversation.map((chat, index) => (
               <div
                 key={index}
@@ -97,8 +97,8 @@ export default function ChatPage() {
           </div>
         )}
         <div
-          className="flex items-center bg-[#1C1F28] py-2 mb-3 md:px-8
-            px-4 rounded-3xl fixed bottom-4 w-[90%] sm:w-[50%]"
+          className="flex items-center bg-[#1C1F28] py-2 md:px-8
+            px-4 rounded-3xl fixed bottom-3 w-[95%] sm:w-[50%] h-[50px]"
         >
           <SearchIcon
             width={isSmallDevice ? "16" : "24"}

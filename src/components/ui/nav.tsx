@@ -31,6 +31,7 @@ export default function Navbar() {
             d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
           />
         </svg>
+        <span className="fixed top-4 left-40 right-40 text-xl">Fagoon</span>
       </div>
 
       {isMenuOpen && (
