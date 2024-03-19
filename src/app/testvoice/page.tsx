@@ -2,43 +2,32 @@
 import React, { useState } from "react";
 
 const RecordAudio = () => {
-  const [recording, setRecording] = useState(false);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]); // Explicitly specify the type
+  const [file, setFile] = useState<File | null>(null);
+  const [response, setResponse] = useState<string>("");
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-
-      mediaRecorder.ondataavailable = (event) => {
-        setAudioChunks((prev: Blob[]) => [...prev, event.data]);
-      };
-
-      mediaRecorder.start();
-      setRecording(true);
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (fileList && fileList.length > 0) {
+      setFile(fileList[0]);
     }
   };
 
-  const stopRecording = () => {
-    setRecording(false);
-    const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+  const handleSubmit = () => {
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("file", audioBlob, "myrec.mp3");
+    formData.append("file", file);
 
     fetch("https://chat.fagoondigital.com/api/prompt/", {
       method: "POST",
-      headers: {
-        "Accept": "*/*",
-        "Content-Type": "multipart/form-data",
-        "Accept-Encoding": "gzip, deflate, br"
-      },
       body: formData,
     })
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((data) => {
-        console.log("Response:", data);
+        setResponse(`Fagoon: ${data.response}`);
       })
       .catch((error) => {
         console.error("Error sending audio:", error);
@@ -47,9 +36,9 @@ const RecordAudio = () => {
 
   return (
     <div>
-      <button onClick={recording ? stopRecording : startRecording}>
-        {recording ? "Stop Recording" : "Start Recording"}
-      </button>
+      <input type="file" onChange={handleFileChange} />
+      <button onClick={handleSubmit}>Submit</button>
+      {response && <div>Response: {response}</div>}
     </div>
   );
 };
