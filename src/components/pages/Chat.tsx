@@ -20,6 +20,7 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false); // Track speech synthesis status
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -32,37 +33,56 @@ export default function ChatPage() {
   const handlePlayResponse = async (response: string, isVoice?: boolean) => {
     if ("speechSynthesis" in window) {
       const synth = window.speechSynthesis;
-      synth.cancel(); // Stop any ongoing speech
+
+      // if speaking, stop playing audio
+      if (synth.speaking) {
+        synth.cancel();
+        setIsSpeaking(false);
+        return;
+      }
 
       // Ensure full text is read by splitting into manageable chunks
       const utterances = splitTextIntoChunks(response);
       for (const utteranceText of utterances) {
         const utterance = new SpeechSynthesisUtterance(utteranceText);
         synth.speak(utterance);
+        utteranceRef.current = utterance; // Store reference to current utterance
+        setIsSpeaking(true);
         await new Promise((resolve) => (utterance.onend = resolve)); // Wait for each chunk to finish
       }
+      setIsSpeaking(false);
     } else {
       console.error("Speech synthesis not supported by your browser.");
     }
-
-    // if (isVoice) {
-    //   // If response is from voice input, play the recorded audio as well
-    //   handlePlayRecordedAudio(conversation[conversation.length - 1].audioBlob!);
-    // }
   };
 
-  // Helper function to split text into chunks for speech synthesis
   function splitTextIntoChunks(text: string, chunkSize = 200): string[] {
     const chunks = [];
     let currentChunk = "";
-    for (const word of text.split(" ")) {
-      if (currentChunk.length + word.length > chunkSize) {
-        chunks.push(currentChunk);
-        currentChunk = "";
+
+    // Split the text into sentences
+    const sentences = text.match(/[^\.!\?]+[\.!\?]+/g);
+
+    if (sentences) {
+      for (const sentence of sentences) {
+        if (currentChunk.length + sentence.length > chunkSize) {
+          chunks.push(currentChunk);
+          currentChunk = "";
+        }
+        currentChunk += sentence + " ";
       }
-      currentChunk += word + " ";
+    } else {
+      // If the text contains no sentence-ending punctuation, split by characters
+      for (let i = 0; i < text.length; i += chunkSize) {
+        const chunk = text.slice(i, i + chunkSize);
+        chunks.push(chunk);
+      }
     }
-    chunks.push(currentChunk);
+
+    if (currentChunk.trim()) {
+      chunks.push(currentChunk);
+    }
+
     return chunks;
   }
 
@@ -102,6 +122,11 @@ export default function ChatPage() {
   };
 
   const startRecording = async () => {
+    // if playing, stop play
+    if (utteranceRef.current) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
@@ -133,6 +158,13 @@ export default function ChatPage() {
           };
 
           setConversation((prev) => [...prev, newChat]);
+
+          if (response.data.response) {
+            handlePlayResponse(
+              response.data.response,
+              !!response.data.audioBlob
+            );
+          }
         } catch (error) {
           console.log(error);
         } finally {
@@ -171,9 +203,7 @@ export default function ChatPage() {
     <>
       <Navbar />
       <main
-        className={`flex mt-14 flex-col justify-between md:h-screen h-fit ${
-          isRecording ? "glow-purple" : ""
-        }`}
+        className={`flex mt-14 flex-col justify-between md:h-screen h-fit `}
       >
         {conversation.length === 0 ? (
           <Showcase handleSubmit={handleSubmit} />
@@ -201,25 +231,42 @@ export default function ChatPage() {
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">Fagoon:</span>
                     <span>{chat.response}</span>
+
                     <button
                       onClick={() => handlePlayResponse(chat.response!)}
                       className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer"
                     >
-                      {/* Play button SVG */}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="feather feather-play"
-                        width="20"
-                        height="20"
-                      >
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                      </svg>
+                      {isSpeaking ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="feather feather-stop"
+                          width="20"
+                          height="20"
+                        >
+                          <rect x="5" y="5" width="14" height="14" />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="feather feather-play"
+                          width="20"
+                          height="20"
+                        >
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                      )}
                     </button>
                   </div>
                 )}
@@ -268,6 +315,7 @@ export default function ChatPage() {
                 }`}
                 width={iconSize.toString()}
                 height={iconSize.toString()}
+                isRecording={isRecording}
               />
             </button>
           </div>
