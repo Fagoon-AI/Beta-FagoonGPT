@@ -176,3 +176,7 @@
   font-size: 16px;
   color: #333;
 }
+
+.glow-purple {
+  filter: drop-shadow(0 0 10px purple);
+}
