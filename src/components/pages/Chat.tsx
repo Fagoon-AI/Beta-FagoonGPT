@@ -3,29 +3,68 @@ import React, { useState, useEffect, useRef } from "react";
 import Showcase from "./showcase";
 import FilesIcon from "../icons/Files";
 import MicIcon from "../icons/Mic";
-import { useSmallDevices } from "@/hooks/useSmallDevices";
-import axios from "axios";
 import SearchIcon from "../icons/Search";
 import Navbar from "../ui/nav";
-import { Skeleton } from "../ui/skeleton";
+import axios from "axios";
+import { useSmallDevices } from "@/hooks/useSmallDevices";
 
 export interface ChatMessage {
   prompt: string;
   response: string | null;
-  audioBlob: Blob | null; // Add audioBlob property to ChatMessage
+  user_prompt?: string;
+  audioBlob?: Blob | null;
 }
 
 export default function ChatPage() {
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const [recording, setRecording] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
   };
+
+  const handlePlayResponse = async (response: string, isVoice?: boolean) => {
+    if ("speechSynthesis" in window) {
+      const synth = window.speechSynthesis;
+      synth.cancel(); // Stop any ongoing speech
+
+      // Ensure full text is read by splitting into manageable chunks
+      const utterances = splitTextIntoChunks(response);
+      for (const utteranceText of utterances) {
+        const utterance = new SpeechSynthesisUtterance(utteranceText);
+        synth.speak(utterance);
+        await new Promise((resolve) => (utterance.onend = resolve)); // Wait for each chunk to finish
+      }
+    } else {
+      console.error("Speech synthesis not supported by your browser.");
+    }
+
+    // if (isVoice) {
+    //   // If response is from voice input, play the recorded audio as well
+    //   handlePlayRecordedAudio(conversation[conversation.length - 1].audioBlob!);
+    // }
+  };
+
+  // Helper function to split text into chunks for speech synthesis
+  function splitTextIntoChunks(text: string, chunkSize = 200): string[] {
+    const chunks = [];
+    let currentChunk = "";
+    for (const word of text.split(" ")) {
+      if (currentChunk.length + word.length > chunkSize) {
+        chunks.push(currentChunk);
+        currentChunk = "";
+      }
+      currentChunk += word + " ";
+    }
+    chunks.push(currentChunk);
+    return chunks;
+  }
 
   const handleSubmit = async (prompt?: string) => {
     if (!prompt && inputText.trim() === "") return;
@@ -33,37 +72,53 @@ export default function ChatPage() {
     const newChat: ChatMessage = {
       prompt: prompt || inputText,
       response: null,
-      audioBlob: null, // Initialize audioBlob to null
     };
 
     setConversation((prev) => [...prev, newChat]);
 
     try {
+      setIsProcessing(true);
+
       const response = await axios.post(
         "https://chat.fagoondigital.com/api/prompt/",
-        { prompt: prompt || inputText } // Send prompt as JSON data
+        { prompt: prompt || inputText }
       );
 
       newChat.response = response.data.response;
+      newChat.user_prompt = response.data.user_prompt;
+
       setConversation((prev) => [...prev.slice(0, -1), newChat]);
+
+      if (response.data.response) {
+        handlePlayResponse(response.data.response, !!response.data.audioBlob);
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsProcessing(false);
     }
 
-    setInputText(""); // Clear input text
+    setInputText("");
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
 
-      mediaRecorder.ondataavailable = async (event) => {
-        const newBlob = new Blob([event.data], { type: "audio/mp3" });
+      mediaRecorder.ondataavailable = (event) => {
+        chunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: "audio/mp3" });
 
         try {
+          setIsProcessing(true);
+
           const formData = new FormData();
-          formData.append("file", newBlob, "recorded_audio.mp3");
+          formData.append("file", blob, "recorded_audio.mp3");
 
           const response = await axios.post(
             "https://chat.fagoondigital.com/api/prompt/",
@@ -73,18 +128,21 @@ export default function ChatPage() {
           const newChat: ChatMessage = {
             prompt: "",
             response: response.data.response,
-            audioBlob: newBlob, // Set audioBlob for the current message
+            user_prompt: response.data.user_prompt,
+            audioBlob: blob,
           };
 
           setConversation((prev) => [...prev, newChat]);
         } catch (error) {
           console.log(error);
+        } finally {
+          setIsProcessing(false);
         }
       };
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
-      setRecording(true);
+      setIsRecording(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
@@ -98,7 +156,7 @@ export default function ChatPage() {
     }
 
     mediaRecorder.stop();
-    setRecording(false);
+    setIsRecording(false);
   };
 
   useEffect(() => {
@@ -114,7 +172,7 @@ export default function ChatPage() {
       <Navbar />
       <main
         className={`flex mt-14 flex-col justify-between md:h-screen h-fit ${
-          recording ? "glow-purple" : ""
+          isRecording ? "glow-purple" : ""
         }`}
       >
         {conversation.length === 0 ? (
@@ -130,12 +188,7 @@ export default function ChatPage() {
                 {chat.audioBlob && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">You:</span>
-                    <audio controls>
-                      <source
-                        src={URL.createObjectURL(chat.audioBlob)}
-                        type="audio/mp3"
-                      />
-                    </audio>
+                    <span>{chat.user_prompt}</span>
                   </div>
                 )}
                 {chat.prompt && (
@@ -148,15 +201,40 @@ export default function ChatPage() {
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">Fagoon:</span>
                     <span>{chat.response}</span>
+                    <button
+                      onClick={() => handlePlayResponse(chat.response!)}
+                      className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer"
+                    >
+                      {/* Play button SVG */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="feather feather-play"
+                        width="20"
+                        height="20"
+                      >
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                    </button>
                   </div>
                 )}
               </div>
             ))}
+            {isProcessing && (
+              <div className="text-center animate-pulse">
+                Fagoon is processing your input ...
+              </div>
+            )}
           </div>
         )}
         <div
           className={`flex items-center bg-[#1C1F28] py-2 md:px-8 px-4 rounded-3xl fixed bottom-3 w-[95%] sm:w-[50%] h-[50px] ${
-            recording ? "glow-purple" : ""
+            isRecording ? "glow-purple" : ""
           }`}
         >
           <SearchIcon
@@ -165,7 +243,7 @@ export default function ChatPage() {
           />
           <input
             className={`flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm ${
-              recording ? "" : "glow-purple" // Only apply glow when not recording
+              isRecording ? "" : "glow-purple"
             }`}
             type="text"
             placeholder="What are you looking for?"
@@ -183,9 +261,11 @@ export default function ChatPage() {
               width={iconSize}
               height={iconSize}
             />
-            <button onClick={recording ? stopRecording : startRecording}>
+            <button onClick={isRecording ? stopRecording : startRecording}>
               <MicIcon
-                className={`cursor-pointer ${recording ? "text-red-500" : ""}`}
+                className={`cursor-pointer ${
+                  isRecording ? "text-red-500" : ""
+                }`}
                 width={iconSize.toString()}
                 height={iconSize.toString()}
               />
