@@ -8,6 +8,7 @@ import Navbar from "../ui/nav";
 import axios from "axios";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
+import { set } from "react-hook-form";
 
 export interface ChatMessage {
   prompt: string;
@@ -21,72 +22,74 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false); // Track speech synthesis status
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [copiedMessage, setCopiedMessage] = useState("");
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
+    null
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
   };
 
-  const handlePlayResponse = async (response: string, isVoice?: boolean) => {
-    if ("speechSynthesis" in window) {
-      const synth = window.speechSynthesis;
-
-      // if speaking, stop playing audio
-      if (synth.speaking) {
-        synth.cancel();
-        setIsSpeaking(false);
-        return;
-      }
-
-      // Ensure full text is read by splitting into manageable chunks
-      const utterances = splitTextIntoChunks(response);
-      for (const utteranceText of utterances) {
-        const utterance = new SpeechSynthesisUtterance(utteranceText);
-        synth.speak(utterance);
-        utteranceRef.current = utterance; // Store reference to current utterance
-        setIsSpeaking(true);
-        await new Promise((resolve) => (utterance.onend = resolve)); // Wait for each chunk to finish
-      }
+  const handlePlayResponse = async (
+    response: string | boolean,
+    isVoice?: boolean
+  ) => {
+    if (isSpeaking) {
+      audioElement?.pause();
       setIsSpeaking(false);
+    }
+
+    if (typeof response === "string" && !isSpeaking && !isProcessing) {
+      try {
+        setIsProcessing(true);
+
+        const audioResponse = await axios.post(
+          "https://chat.fagoondigital.com/api/fagoonchat_audio/",
+          { chat: response },
+          { responseType: "blob" }
+        );
+
+        const audioBlob = new Blob([audioResponse.data], {
+          type: "audio/mpeg",
+        });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const newAudio = new Audio(audioUrl);
+
+        // Wait for the audio to finish playing before proceeding
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
+
+        setAudioElement(newAudio);
+        setIsSpeaking(true);
+        newAudio.play();
+        newAudio.onended = () => {
+          setIsSpeaking(false);
+        };
+      } catch (error) {
+        console.error("Error fetching and playing audio:", error);
+      } finally {
+        setIsProcessing(false);
+      }
     } else {
-      console.error("Speech synthesis not supported by your browser.");
+      setIsSpeaking(false);
     }
   };
 
-  function splitTextIntoChunks(text: string, chunkSize = 200): string[] {
-    const chunks = [];
-    let currentChunk = "";
-
-    // Split the text into sentences
-    const sentences = text.match(/[^\.!\?]+[\.!\?]+/g);
-
-    if (sentences) {
-      for (const sentence of sentences) {
-        if (currentChunk.length + sentence.length > chunkSize) {
-          chunks.push(currentChunk);
-          currentChunk = "";
-        }
-        currentChunk += sentence + " ";
-      }
+  const handleAudioToggle = () => {
+    if (isSpeaking) {
+      audioElement?.pause();
+      setIsSpeaking(false);
     } else {
-      // If the text contains no sentence-ending punctuation, split by characters
-      for (let i = 0; i < text.length; i += chunkSize) {
-        const chunk = text.slice(i, i + chunkSize);
-        chunks.push(chunk);
-      }
+      audioElement?.play();
+      setIsSpeaking(true);
     }
-
-    if (currentChunk.trim()) {
-      chunks.push(currentChunk);
-    }
-
-    return chunks;
-  }
+  };
 
   const handleSubmit = async (prompt?: string) => {
     setInputText("");
@@ -110,22 +113,29 @@ export default function ChatPage() {
       newChat.response = response.data.response;
       newChat.user_prompt = response.data.user_prompt;
 
-      setConversation((prev) => [...prev.slice(0, -1), newChat]);
-
       if (response.data.response) {
-        handlePlayResponse(response.data.response, !!response.data.audioBlob);
+        await handlePlayResponse(
+          response.data.response,
+          !!response.data.audioBlob
+        );
       }
+
+      // Wait for the audio to finish playing before proceeding
+      // await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
+
+      setConversation((prev) => [...prev.slice(0, -1), newChat]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
-
-    setInputText("");
   };
 
   const startRecording = async () => {
-    // if playing, stop play
+    if (isSpeaking) {
+      audioElement?.pause();
+      setIsSpeaking(false);
+    }
     if (utteranceRef.current) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
@@ -246,7 +256,7 @@ export default function ChatPage() {
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handlePlayResponse(chat.response!)}
+                        onClick={handleAudioToggle}
                         className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer relative"
                       >
                         {isSpeaking ? (
@@ -258,11 +268,12 @@ export default function ChatPage() {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="feather feather-stop"
+                            className="feather feather-pause"
                             width="20"
                             height="20"
                           >
-                            <rect x="5" y="5" width="14" height="14" />
+                            <rect x="6" y="4" width="4" height="16" />
+                            <rect x="14" y="4" width="4" height="16" />
                           </svg>
                         ) : (
                           <svg
