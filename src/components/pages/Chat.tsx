@@ -7,6 +7,7 @@ import SearchIcon from "../icons/Search";
 import Navbar from "../ui/nav";
 import axios from "axios";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
+import { toast } from "sonner";
 
 export interface ChatMessage {
   prompt: string;
@@ -25,6 +26,7 @@ export default function ChatPage() {
   const lastChatRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [copiedMessage, setCopiedMessage] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
@@ -87,6 +89,7 @@ export default function ChatPage() {
   }
 
   const handleSubmit = async (prompt?: string) => {
+    setInputText("");
     if (!prompt && inputText.trim() === "") return;
 
     const newChat: ChatMessage = {
@@ -191,6 +194,15 @@ export default function ChatPage() {
     setIsRecording(false);
   };
 
+  const handleCopyResponse = (response: string) => {
+    navigator.clipboard.writeText(response);
+    setCopiedMessage("Copied!");
+    setTimeout(() => {
+      setCopiedMessage("");
+    }, 2000);
+    toast.success("Response copied to clipboard");
+  };
+
   useEffect(() => {
     if (lastChatRef.current) {
       lastChatRef.current.scrollIntoView({ behavior: "smooth" });
@@ -232,11 +244,48 @@ export default function ChatPage() {
                     <span className="font-semibold">Fagoon:</span>
                     <span>{chat.response}</span>
 
-                    <button
-                      onClick={() => handlePlayResponse(chat.response!)}
-                      className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer"
-                    >
-                      {isSpeaking ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handlePlayResponse(chat.response!)}
+                        className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer relative"
+                      >
+                        {isSpeaking ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="feather feather-stop"
+                            width="20"
+                            height="20"
+                          >
+                            <rect x="5" y="5" width="14" height="14" />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="feather feather-play"
+                            width="20"
+                            height="20"
+                          >
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                          </svg>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={handleCopyResponse.bind(null, chat.response)}
+                        className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer relative"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -245,29 +294,23 @@ export default function ChatPage() {
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="feather feather-stop"
+                          className="feather feather-copy"
                           width="20"
                           height="20"
                         >
-                          <rect x="5" y="5" width="14" height="14" />
+                          <rect
+                            x="9"
+                            y="9"
+                            width="13"
+                            height="13"
+                            rx="2"
+                            ry="2"
+                          ></rect>
+                          <path d="M5 15h11"></path>
+                          <path d="M15 9V4h6"></path>
                         </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="feather feather-play"
-                          width="20"
-                          height="20"
-                        >
-                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                      )}
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
