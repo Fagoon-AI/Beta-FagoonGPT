@@ -34,7 +34,6 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
       if (isUnauthorizedError(error)) {
         return await handleUnauthorizedError(accessToken);
       }
-      console.log(error);
       throw error;
     }
   };
@@ -47,17 +46,14 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
       return redirect("/login");
     }
     refreshToken = JSON.parse(refreshToken);
-    console.log(refreshToken);
     try {
       const response = await refreshTokenAPI({ refreshToken } as {
         refreshToken: string;
       });
-      console.log(response.data);
       const { access_token, refresh_token } = response.data;
       localStorage.setItem("accessToken", JSON.stringify(access_token));
       localStorage.setItem("refreshToken", JSON.stringify(refresh_token));
       const userData = await getCurrentUserAPI({ accessToken: access_token });
-      console.log(userData.data);
       return userData.data;
     } catch (error) {
       if (isUnauthorizedError(error)) {
@@ -67,7 +63,6 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
         router.refresh();
         return null;
       }
-      console.log(error);
     }
   };
 
