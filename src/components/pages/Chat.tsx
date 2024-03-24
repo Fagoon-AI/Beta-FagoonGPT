@@ -13,6 +13,7 @@ import PlayIcon from "../icons/PlayIcon";
 import ClipboardIcon from "../icons/CipboardIcon";
 import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
+import SendIcon from "../icons/SendIcon";
 
 export interface ChatMessage {
   prompt: string;
@@ -305,11 +306,6 @@ export default function ChatPage() {
             }}
           />
           <div className="flex items-center gap-2">
-            <FilesIcon
-              className="cursor-pointer"
-              width={iconSize}
-              height={iconSize}
-            />
             <button onClick={isRecording ? stopRecording : startRecording}>
               <MicIcon
                 className={cn(
@@ -319,6 +315,17 @@ export default function ChatPage() {
                 width={iconSize.toString()}
                 height={iconSize.toString()}
                 isRecording={isRecording}
+              />
+            </button>
+            <button
+              onClick={() => {
+                handleSubmit();
+              }}
+            >
+              <SendIcon
+                className="cursor-pointer"
+                width={iconSize}
+                height={iconSize}
               />
             </button>
           </div>
