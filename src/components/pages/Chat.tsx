@@ -8,13 +8,18 @@ import Navbar from "../ui/nav";
 import axios from "axios";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
-import { set } from "react-hook-form";
+import PauseIcon from "../icons/PauseIcon";
+import PlayIcon from "../icons/PlayIcon";
+import ClipboardIcon from "../icons/CipboardIcon";
+import { Skeleton } from "../ui/skeleton";
+import { cn } from "@/lib/utils";
 
 export interface ChatMessage {
   prompt: string;
   response: string | null;
   user_prompt?: string;
   audioBlob?: Blob | null;
+  isAudioPlaying: boolean;
 }
 
 export default function ChatPage() {
@@ -22,36 +27,47 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  // const [isSpeaking, setIsSpeaking] = useState(false);
+  const isSpeaking = conversation.some((chat) => chat.isAudioPlaying);
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const [copiedMessage, setCopiedMessage] = useState("");
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null
   );
+  const [scroll, setScroll] = useState(false);
+
+  const setSpeakingFalse = () => {
+    setConversation((prev) =>
+      prev.map((chat) => ({ ...chat, isAudioPlaying: false }))
+    );
+    setScroll(false);
+  };
+
+  const setSpeakingTrue = (index: number) => {
+    setConversation((prev) =>
+      prev.map((chat, i) => ({ ...chat, isAudioPlaying: i === index }))
+    );
+    setScroll(false);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
   };
 
-  const handlePlayResponse = async (
-    response: string | boolean,
-    isVoice?: boolean
-  ) => {
+  const handlePlayResponse = async (chat: ChatMessage, index: number) => {
     if (isSpeaking) {
       audioElement?.pause();
-      setIsSpeaking(false);
+      setSpeakingFalse();
     }
 
-    if (typeof response === "string" && !isSpeaking && !isProcessing) {
+    if (typeof chat.response === "string" && !isSpeaking && !isProcessing) {
       try {
         setIsProcessing(true);
 
         const audioResponse = await axios.post(
           "https://chat.fagoondigital.com/api/fagoonchat_audio/",
-          { chat: response },
+          { chat: chat.response },
           { responseType: "blob" }
         );
 
@@ -66,10 +82,10 @@ export default function ChatPage() {
         await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
 
         setAudioElement(newAudio);
-        setIsSpeaking(true);
+        setSpeakingTrue(index);
         newAudio.play();
         newAudio.onended = () => {
-          setIsSpeaking(false);
+          setSpeakingFalse();
         };
       } catch (error) {
         console.error("Error fetching and playing audio:", error);
@@ -77,17 +93,18 @@ export default function ChatPage() {
         setIsProcessing(false);
       }
     } else {
-      setIsSpeaking(false);
+      setSpeakingFalse();
     }
   };
 
-  const handleAudioToggle = () => {
+  const handleAudioToggle = (chat: ChatMessage, index: number) => {
     if (isSpeaking) {
       audioElement?.pause();
-      setIsSpeaking(false);
+      setSpeakingFalse();
     } else {
-      audioElement?.play();
-      setIsSpeaking(true);
+      // audioElement?.play();
+      // setIsSpeaking(true);
+      handlePlayResponse(chat, index);
     }
   };
 
@@ -98,9 +115,11 @@ export default function ChatPage() {
     const newChat: ChatMessage = {
       prompt: prompt || inputText,
       response: null,
+      isAudioPlaying: false,
     };
 
     setConversation((prev) => [...prev, newChat]);
+    setScroll(true);
 
     try {
       setIsProcessing(true);
@@ -113,17 +132,8 @@ export default function ChatPage() {
       newChat.response = response.data.response;
       newChat.user_prompt = response.data.user_prompt;
 
-      if (response.data.response) {
-        await handlePlayResponse(
-          response.data.response,
-          !!response.data.audioBlob
-        );
-      }
-
-      // Wait for the audio to finish playing before proceeding
-      // await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
-
       setConversation((prev) => [...prev.slice(0, -1), newChat]);
+      setScroll(true);
     } catch (error) {
       console.error(error);
     } finally {
@@ -134,11 +144,7 @@ export default function ChatPage() {
   const startRecording = async () => {
     if (isSpeaking) {
       audioElement?.pause();
-      setIsSpeaking(false);
-    }
-    if (utteranceRef.current) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+      setSpeakingFalse();
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -168,15 +174,14 @@ export default function ChatPage() {
             response: response.data.response,
             user_prompt: response.data.user_prompt,
             audioBlob: blob,
+            isAudioPlaying: false,
           };
 
           setConversation((prev) => [...prev, newChat]);
+          setScroll(true);
 
           if (response.data.response) {
-            handlePlayResponse(
-              response.data.response,
-              !!response.data.audioBlob
-            );
+            handlePlayResponse(response.data, conversation.length);
           }
         } catch (error) {
           console.log(error);
@@ -206,15 +211,11 @@ export default function ChatPage() {
 
   const handleCopyResponse = (response: string) => {
     navigator.clipboard.writeText(response);
-    setCopiedMessage("Copied!");
-    setTimeout(() => {
-      setCopiedMessage("");
-    }, 2000);
     toast.success("Response copied to clipboard");
   };
 
   useEffect(() => {
-    if (lastChatRef.current) {
+    if (lastChatRef.current && scroll) {
       lastChatRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [conversation]);
@@ -222,10 +223,10 @@ export default function ChatPage() {
   const iconSize = isSmallDevice ? "24" : "32";
 
   return (
-    <>
+    <div className="">
       <Navbar />
       <main
-        className={`flex mt-14 flex-col justify-between md:h-screen h-fit `}
+        className={`flex flex-col mt-14 justify-between md:h-screen h-100dvh`}
       >
         {conversation.length === 0 ? (
           <Showcase handleSubmit={handleSubmit} />
@@ -249,103 +250,52 @@ export default function ChatPage() {
                     <span>{chat.prompt}</span>
                   </div>
                 )}
-                {chat.response && (
+                {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">Fagoon:</span>
                     <span>{chat.response}</span>
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={handleAudioToggle}
+                        onClick={() => handleAudioToggle(chat, index)}
                         className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer relative"
                       >
-                        {isSpeaking ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="feather feather-pause"
-                            width="20"
-                            height="20"
-                          >
-                            <rect x="6" y="4" width="4" height="16" />
-                            <rect x="14" y="4" width="4" height="16" />
-                          </svg>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="feather feather-play"
-                            width="20"
-                            height="20"
-                          >
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                        )}
+                        {chat.isAudioPlaying ? <PauseIcon /> : <PlayIcon />}
                       </button>
 
                       <button
                         onClick={handleCopyResponse.bind(null, chat.response)}
                         className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer relative"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="feather feather-copy"
-                          width="20"
-                          height="20"
-                        >
-                          <rect
-                            x="9"
-                            y="9"
-                            width="13"
-                            height="13"
-                            rx="2"
-                            ry="2"
-                          ></rect>
-                          <path d="M5 15h11"></path>
-                          <path d="M15 9V4h6"></path>
-                        </svg>
+                        <ClipboardIcon />
                       </button>
                     </div>
+                  </div>
+                ) : (
+                  <div className="w-[95%] mx-auto flex flex-col gap-2">
+                    <Skeleton className="w-full h-[20px]" />
+                    <Skeleton className="w-full h-[20px]" />
                   </div>
                 )}
               </div>
             ))}
-            {isProcessing && (
-              <div className="text-center animate-pulse">
-                Fagoon is processing your input ...
-              </div>
-            )}
           </div>
         )}
         <div
-          className={`flex items-center bg-[#1C1F28] py-2 md:px-8 px-4 rounded-3xl fixed bottom-3 w-[95%] sm:w-[50%] h-[50px] ${
+          className={cn(
+            "flex items-center bg-[#1C1F28] py-2 md:px-8 px-4 rounded-3xl fixed bottom-3 w-[95%] lg:w-[50%]  h-[50px]",
             isRecording ? "glow-purple" : ""
-          }`}
+          )}
         >
           <SearchIcon
             width={isSmallDevice ? "16" : "24"}
             height={isSmallDevice ? "16" : "24"}
           />
           <input
-            className={`flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm ${
+            className={cn(
+              "flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm",
               isRecording ? "" : "glow-purple"
-            }`}
+            )}
             type="text"
             placeholder="What are you looking for?"
             value={inputText}
@@ -364,9 +314,10 @@ export default function ChatPage() {
             />
             <button onClick={isRecording ? stopRecording : startRecording}>
               <MicIcon
-                className={`cursor-pointer ${
+                className={cn(
+                  "cursor-pointer ",
                   isRecording ? "text-red-500" : ""
-                }`}
+                )}
                 width={iconSize.toString()}
                 height={iconSize.toString()}
                 isRecording={isRecording}
@@ -375,6 +326,6 @@ export default function ChatPage() {
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }

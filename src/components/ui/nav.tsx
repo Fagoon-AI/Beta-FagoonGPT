@@ -16,22 +16,28 @@ export default function Navbar() {
 
   return (
     <div className="relative h-100vh">
-      <div className="fixed top-4 left-4 z-10 w-full" onClick={toggleMenu}>
-        <svg
-          className="w-6 h-6 cursor-pointer"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-          />
-        </svg>
-        <span className="fixed top-4 left-40 right-40 text-xl">Fagoon</span>
+      <div className="fixed top-4 left-0 z-10 w-full flex justify-between items-center px-4">
+        <div onClick={toggleMenu}>
+          <svg
+            className="w-6 h-6 cursor-pointer"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d={
+                isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"
+              }
+            />
+          </svg>
+        </div>
+        <span className="absolute left-1/2 transform -translate-x-1/2 text-xl">
+          Fagoon
+        </span>
       </div>
 
       {isMenuOpen && (
