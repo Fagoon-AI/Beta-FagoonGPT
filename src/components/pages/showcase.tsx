@@ -86,13 +86,13 @@ export default function Showcase({ handleSubmit }: IShowcaseProps) {
   return (
     <div className="flex flex-col md:gap-8 gap-6 overflow-y-auto scrollbar-none mb-4 w-[90%] mx-auto">
       <div className="flex flex-col md:gap-8 gap-6">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           {username !== "" && (
-            <h1 className="md:text-5xl text-2xl bg-gradient-to-r from-[#4285F4] via-[#9B72CB] via-[#D96570] via-[#D96570] via-[#9B72CB] via-[#4285F4] via-[#9B72CB] via-[#D96570] to-[#131314] bg-clip-text text-transparent">
-              Hello, {username}
+            <h1 className="md:text-4xl text-2xl bg-gradient-to-r from-[#4285F4] via-[#9B72CB] via-[#D96570] via-[#D96570] via-[#9B72CB] via-[#4285F4] via-[#9B72CB] via-[#D96570] to-[#131314] bg-clip-text text-transparent">
+              Hello, {username.split(" ")[0]}
             </h1>
           )}
-          <h2 className="md:text-5xl text-2xl">How can I help you today?</h2>
+          <h2 className="md:text-4xl text-2xl">How can I help you today?</h2>
         </div>
       </div>
       <div className="flex flex-col gap-5">

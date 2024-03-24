@@ -35,7 +35,7 @@ export default function Navbar() {
             />
           </svg>
         </div>
-        <span className="absolute left-1/2 transform -translate-x-1/2 text-xl">
+        <span className="absolute left-1/2 transform -translate-x-1/2 text-2xl md:text-3xl">
           Fagoon
         </span>
       </div>

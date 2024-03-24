@@ -223,15 +223,13 @@ export default function ChatPage() {
   const iconSize = isSmallDevice ? "24" : "32";
 
   return (
-    <div className="">
+    <div className="mt-14">
       <Navbar />
-      <main
-        className={`flex flex-col mt-14 justify-between md:h-screen h-100dvh`}
-      >
+      <main className={`flex flex-col justify-between h-100dvh`}>
         {conversation.length === 0 ? (
           <Showcase handleSubmit={handleSubmit} />
         ) : (
-          <div className="flex sm:mt-12 flex-col gap-6 overflow-y-auto scrollbar-none h-[calc(100dvh-124px)]">
+          <div className="flex flex-col gap-6 overflow-y-auto scrollbar-none h-[calc(100dvh-124px)]">
             {conversation.map((chat, index) => (
               <div
                 key={index}
