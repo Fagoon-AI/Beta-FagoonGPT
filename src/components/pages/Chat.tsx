@@ -67,7 +67,7 @@ export default function ChatPage() {
         setIsProcessing(true);
 
         const audioResponse = await axios.post(
-          "https://chat.fagoondigital.com/api/fagoonchat_audio/",
+          "https://gpt.aifagoon.com/api/fagoonchat_audio/",
           { chat: chat.response },
           { responseType: "blob" }
         );
@@ -126,7 +126,7 @@ export default function ChatPage() {
       setIsProcessing(true);
 
       const response = await axios.post(
-        "https://chat.fagoondigital.com/api/prompt/",
+        "https://gpt.aifagoon.com/api/prompt/",
         { prompt: prompt || inputText }
       );
 
@@ -166,7 +166,7 @@ export default function ChatPage() {
           formData.append("file", blob, "recorded_audio.mp3");
 
           const response = await axios.post(
-            "https://chat.fagoondigital.com/api/prompt/",
+            "https://gpt.aifagoon.com/api/prompt/",
             formData
           );
 
