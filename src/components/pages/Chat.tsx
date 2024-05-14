@@ -273,6 +273,7 @@ export default function ChatPage() {
       console.error("Error accessing microphone:", error);
     }
   };
+  const glowIntensity = Math.min(1, audioLevel / 100);
 
   const stopRecording = () => {
     const mediaRecorder = mediaRecorderRef.current;
@@ -383,7 +384,7 @@ export default function ChatPage() {
               : ""
           )}
           style={{
-            boxShadow: isRecording ? "0 0 5px 2px rgba(255, 0, 255, 0.5)" : "",
+            boxShadow: `0 0 ${audioLevel}px 2px rgba(0, 255, 0, ${glowIntensity})`,
           }}
         >
           <label htmlFor="file-upload" className="cursor-pointer">
@@ -401,10 +402,7 @@ export default function ChatPage() {
             onChange={handleFileUpload}
           />
           <input
-            className={cn(
-              "flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm",
-              isRecording ? "" : "glow-purple"
-            )}
+            className="flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
             placeholder={
               isRecording ? "Listening..." : "What are you looking for?"
             }
@@ -415,12 +413,8 @@ export default function ChatPage() {
               }
             }}
             disabled={micActive}
-            style={{
-              resize: "vertical",
-              minHeight: "20px",
-              maxHeight: `${maxChatBoxHeight}px`,
-            }}
           />
+
           <div className="flex items-center gap-2">
             <div
               className={cn("mic-animation", isRecording ? "listening" : "")}
@@ -428,7 +422,7 @@ export default function ChatPage() {
             <button onClick={isRecording ? stopRecording : startRecording}>
               {isRecording ? (
                 <div className="flex items-center gap-2">
-                  <Equalizer audioLevel={audioLevel} />
+                  {/* <Equalizer audioLevel={audioLevel} /> */}
                   <SendIcon
                     className="mic-icon cursor-pointer listening"
                     width={iconSize.toString()}
