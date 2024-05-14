@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useEffect, useRef } from "react";
 import Showcase from "./showcase";
 import FilesIcon from "../icons/Files";
@@ -10,25 +9,58 @@ import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
 import PauseIcon from "../icons/PauseIcon";
 import PlayIcon from "../icons/PlayIcon";
+import AddIcon from "../icons/Add";
 import ClipboardIcon from "../icons/CipboardIcon";
 import { Skeleton } from "../ui/skeleton";
+import PulseIcon from "../icons/Pulse";
 import { cn } from "@/lib/utils";
 import SendIcon from "../icons/SendIcon";
-
+import "./ChatPage.module.css";
 export interface ChatMessage {
   prompt: string;
   response: string | null;
   user_prompt?: string;
   audioBlob?: Blob | null;
   isAudioPlaying: boolean;
+  uploadedFileNames?: string[];
 }
+const Equalizer: React.FC<{ audioLevel: number }> = ({ audioLevel }) => {
+  const lines = 5;
+  const lineHeight = 6;
+  const [maxChatBoxHeight, setMaxChatBoxHeight] = useState(500);
+  return (
+    <div className="equalizer flex items-end gap-1">
+      {Array.from({ length: lines }).map((_, index) => (
+        <div
+          key={index}
+          className="equalizer-line"
+          style={{
+            height: `${
+              Math.floor(Math.random() * audioLevel * 0.8) + lineHeight
+            }px`,
+            backgroundColor: "#6C63FF",
+            width: "4px",
+            marginLeft: "2px",
+            animation: "equalizer 0.5s infinite alternate",
+            animationDelay: `${index * 0.05}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default function ChatPage() {
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [showWave, setShowWave] = useState(false);
+  const [micActive, setMicActive] = useState(false);
+
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  // const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isFileUploading, setIsFileUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const isSpeaking = conversation.some((chat) => chat.isAudioPlaying);
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
@@ -36,8 +68,55 @@ export default function ChatPage() {
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null
   );
-  const [scroll, setScroll] = useState(false);
 
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(analyzeAudioLevel)
+      .catch((error) => console.error("Error accessing microphone:", error));
+
+    return () => {
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, []);
+  const [scroll, setScroll] = useState(false);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      try {
+        const fileNames = Array.from(files).map((file) => file.name);
+
+        console.log("Uploaded Files:", fileNames);
+      } catch (error) {
+        console.error("Error handling file upload:", error);
+      }
+    }
+  };
+
+  const toggleMic = () => {
+    setMicActive((prev) => !prev);
+  };
+
+  const analyzeAudioLevel = (stream: MediaStream) => {
+    const audioContext = new AudioContext();
+    const analyzer = audioContext.createAnalyser();
+    const microphone = audioContext.createMediaStreamSource(stream);
+
+    microphone.connect(analyzer);
+
+    const data = new Uint8Array(analyzer.frequencyBinCount);
+
+    const updateAudioLevel = () => {
+      analyzer.getByteFrequencyData(data);
+      const average = data.reduce((acc, val) => acc + val, 0) / data.length;
+      setAudioLevel(average);
+      requestAnimationFrame(updateAudioLevel);
+    };
+
+    updateAudioLevel();
+  };
   const setSpeakingFalse = () => {
     setConversation((prev) =>
       prev.map((chat) => ({ ...chat, isAudioPlaying: false }))
@@ -79,8 +158,7 @@ export default function ChatPage() {
 
         const newAudio = new Audio(audioUrl);
 
-        // Wait for the audio to finish playing before proceeding
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         setAudioElement(newAudio);
         setSpeakingTrue(index);
@@ -103,12 +181,9 @@ export default function ChatPage() {
       audioElement?.pause();
       setSpeakingFalse();
     } else {
-      // audioElement?.play();
-      // setIsSpeaking(true);
       handlePlayResponse(chat, index);
     }
   };
-
   const handleSubmit = async (prompt?: string) => {
     setInputText("");
     if (!prompt && inputText.trim() === "") return;
@@ -141,7 +216,6 @@ export default function ChatPage() {
       setIsProcessing(false);
     }
   };
-
   const startRecording = async () => {
     if (isSpeaking) {
       audioElement?.pause();
@@ -149,6 +223,7 @@ export default function ChatPage() {
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      analyzeAudioLevel(stream);
       const mediaRecorder = new MediaRecorder(stream);
       const chunks: Blob[] = [];
 
@@ -208,6 +283,7 @@ export default function ChatPage() {
 
     mediaRecorder.stop();
     setIsRecording(false);
+    setInputText("");
   };
 
   const handleCopyResponse = (response: string) => {
@@ -222,9 +298,9 @@ export default function ChatPage() {
   }, [conversation]);
 
   const iconSize = isSmallDevice ? "24" : "32";
-
+  const maxChatBoxHeight = 500;
   return (
-    <div className="mt-14">
+    <div className="mt-14" style={{ fontFamily: "Poppins" }}>
       <Navbar />
       <main className={`flex flex-col justify-between h-100dvh`}>
         {conversation.length === 0 ? (
@@ -239,20 +315,36 @@ export default function ChatPage() {
               >
                 {chat.audioBlob && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
-                    <span className="font-semibold">You:</span>
+                    <span className="font-bold">You:</span>
                     <span>{chat.user_prompt}</span>
                   </div>
                 )}
                 {chat.prompt && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
-                    <span className="font-semibold">You:</span>
-                    <span>{chat.prompt}</span>
+                    <span className="font-bold">You:</span>
+                    <span style={{ fontWeight: 100, fontSize: "small" }}>
+                      {chat.prompt}
+                    </span>
+                  </div>
+                )}
+                {chat.prompt === "Uploaded Files:" && (
+                  <div className="flex flex-col gap-1 px-4 rounded-lg">
+                    {uploadedFiles.map((file, i) => (
+                      <span
+                        key={i}
+                        style={{ fontWeight: 100, fontSize: "small" }}
+                      >
+                        {file.name}
+                      </span>
+                    ))}
                   </div>
                 )}
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
-                    <span className="font-semibold">Fagoon:</span>
-                    <span>{chat.response}</span>
+                    <span className="font-bold">FagoonGPT:</span>
+                    <span style={{ fontWeight: 100, fontSize: "small" }}>
+                      {chat.response}
+                    </span>
 
                     <div className="flex items-center gap-2">
                       <button
@@ -282,52 +374,88 @@ export default function ChatPage() {
         )}
         <div
           className={cn(
-            "flex items-center bg-[#1C1F28] py-2 md:px-8 px-4 rounded-3xl fixed bottom-3 w-[95%] lg:w-[50%]  h-[50px]",
-            isRecording ? "glow-purple" : ""
+            "flex items-center bg-[#1C1F28] py-2 md:px-8 px-4 rounded-3xl fixed bottom-3 w-[95%] lg:w-[50%] h-[50px]",
+            isRecording ? "glow-purple pulse" : "",
+            audioLevel > 100
+              ? "glow-high pulse"
+              : audioLevel > 50
+              ? "glow-medium pulse"
+              : ""
           )}
+          style={{
+            boxShadow: isRecording ? "0 0 5px 2px rgba(255, 0, 255, 0.5)" : "",
+          }}
         >
-          <SearchIcon
-            width={isSmallDevice ? "16" : "24"}
-            height={isSmallDevice ? "16" : "24"}
+          <label htmlFor="file-upload" className="cursor-pointer">
+            <AddIcon
+              width={isSmallDevice ? "16" : "24"}
+              className="cursor-pointer"
+              height={isSmallDevice ? "16" : "24"}
+            />
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            accept=".mp3,.wav"
+            className="hidden"
+            onChange={handleFileUpload}
           />
           <input
             className={cn(
               "flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm",
               isRecording ? "" : "glow-purple"
             )}
-            type="text"
-            placeholder="What are you looking for?"
-            value={inputText}
+            placeholder={
+              isRecording ? "Listening..." : "What are you looking for?"
+            }
             onChange={handleInputChange}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSubmit();
               }
             }}
+            disabled={micActive}
+            style={{
+              resize: "vertical",
+              minHeight: "20px",
+              maxHeight: `${maxChatBoxHeight}px`,
+            }}
           />
           <div className="flex items-center gap-2">
+            <div
+              className={cn("mic-animation", isRecording ? "listening" : "")}
+            ></div>{" "}
             <button onClick={isRecording ? stopRecording : startRecording}>
-              <MicIcon
-                className={cn(
-                  "cursor-pointer ",
-                  isRecording ? "text-red-500" : ""
-                )}
-                width={iconSize.toString()}
-                height={iconSize.toString()}
-                isRecording={isRecording}
-              />
+              {isRecording ? (
+                <div className="flex items-center gap-2">
+                  <Equalizer audioLevel={audioLevel} />
+                  <SendIcon
+                    className="mic-icon cursor-pointer listening"
+                    width={iconSize.toString()}
+                    height={iconSize.toString()}
+                  />
+                </div>
+              ) : (
+                <MicIcon
+                  className="mic-icon cursor-pointer"
+                  width={iconSize.toString()}
+                  height={iconSize.toString()}
+                />
+              )}
             </button>
-            <button
-              onClick={() => {
-                handleSubmit();
-              }}
-            >
-              <SendIcon
-                className="cursor-pointer"
-                width={iconSize}
-                height={iconSize}
-              />
-            </button>
+            {!isRecording && (
+              <button
+                onClick={() => {
+                  handleSubmit();
+                }}
+              >
+                <SendIcon
+                  className="cursor-pointer"
+                  width={iconSize}
+                  height={iconSize}
+                />
+              </button>
+            )}
           </div>
         </div>
       </main>

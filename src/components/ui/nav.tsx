@@ -22,13 +22,13 @@ export default function Navbar() {
         <div onClick={toggleMenu}>
           <HamburgerIcon isMenuOpen={isMenuOpen} />
         </div>
-        <span className="absolute left-12 md:left-16 text-xl">Fagoon</span>
+        <span className="absolute left-12 md:left-16 text-xl">FagoonGPT</span>
       </div>
 
       {isMenuOpen && (
         <div className="fixed top-0 left-0 z-10 w-64 h-full bg-gray-800">
           <div className="flex items-center justify-between h-16 bg-gray-900">
-            <h1 className="text-xl p-4 text-white">Fagoon</h1>
+            <h1 className="text-xl p-4 text-white">FagoonGPT</h1>
             <button
               className="text-white p-4 focus:outline-none"
               onClick={toggleMenu}
