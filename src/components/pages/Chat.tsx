@@ -97,6 +97,7 @@ export default function ChatPage() {
 
   const toggleMic = () => {
     setMicActive((prev) => !prev);
+    setInputText(""); // Clear input text when mic is toggled
   };
 
   const analyzeAudioLevel = (stream: MediaStream) => {
@@ -269,6 +270,7 @@ export default function ChatPage() {
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsRecording(true);
+      setInputText("");
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
@@ -377,14 +379,12 @@ export default function ChatPage() {
           className={cn(
             "flex items-center bg-[#1C1F28] py-2 md:px-8 px-4 rounded-3xl fixed bottom-3 w-[95%] lg:w-[50%] h-[50px]",
             isRecording ? "glow-purple pulse" : "",
-            audioLevel > 100
-              ? "glow-high pulse"
-              : audioLevel > 50
-              ? "glow-medium pulse"
-              : ""
+            micActive ? "" : ""
           )}
           style={{
-            boxShadow: `0 0 ${audioLevel}px 2px rgba(0, 255, 0, ${glowIntensity})`,
+            boxShadow: isRecording
+              ? `0 0 ${audioLevel}px 2px rgba(0, 255, 0, ${glowIntensity})`
+              : "",
           }}
         >
           <label htmlFor="file-upload" className="cursor-pointer">
@@ -406,13 +406,14 @@ export default function ChatPage() {
             placeholder={
               isRecording ? "Listening..." : "What are you looking for?"
             }
+            value={inputText}
             onChange={handleInputChange}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSubmit();
               }
             }}
-            disabled={micActive}
+            disabled={micActive || isRecording} // Disable if micActive or isRecording
           />
 
           <div className="flex items-center gap-2">
@@ -424,14 +425,18 @@ export default function ChatPage() {
                 <div className="flex items-center gap-2">
                   {/* <Equalizer audioLevel={audioLevel} /> */}
                   <SendIcon
-                    className="mic-icon cursor-pointer listening"
+                    className={`mic-icon cursor-pointer ${
+                      micActive ? "glow-high" : ""
+                    }`}
                     width={iconSize.toString()}
                     height={iconSize.toString()}
                   />
                 </div>
               ) : (
                 <MicIcon
-                  className="mic-icon cursor-pointer"
+                  className={`mic-icon cursor-pointer ${
+                    micActive ? "glow-high" : ""
+                  }`}
                   width={iconSize.toString()}
                   height={iconSize.toString()}
                 />
