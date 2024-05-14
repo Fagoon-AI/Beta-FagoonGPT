@@ -1,20 +1,25 @@
-export default function ClipboardIcon() {
+import * as React from "react";
+
+function ClipboardIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="feather feather-copy"
-      width="20"
-      height="20"
-    >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-      <path d="M5 15h11"></path>
-      <path d="M15 9V4h6"></path>
+    <svg viewBox="0 0 512 512" fill="currentColor" height="1em" width="1em">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth={32}
+        d="M185 128 H407 A57 57 0 0 1 464 185 V407 A57 57 0 0 1 407 464 H185 A57 57 0 0 1 128 407 V185 A57 57 0 0 1 185 128 z"
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={32}
+        d="M383.5 128l.5-24a56.16 56.16 0 00-56-56H112a64.19 64.19 0 00-64 64v216a56.16 56.16 0 0056 56h24"
+      />
     </svg>
   );
 }
+
+export default ClipboardIcon;

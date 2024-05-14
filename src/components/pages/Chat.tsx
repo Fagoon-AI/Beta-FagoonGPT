@@ -8,7 +8,7 @@ import axios from "axios";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
 import PauseIcon from "../icons/PauseIcon";
-import PlayIcon from "../icons/PlayIcon";
+import SoundIcon from "../icons/SoundIcon";
 import AddIcon from "../icons/Add";
 import ClipboardIcon from "../icons/CipboardIcon";
 import { Skeleton } from "../ui/skeleton";
@@ -97,7 +97,7 @@ export default function ChatPage() {
 
   const toggleMic = () => {
     setMicActive((prev) => !prev);
-    setInputText(""); // Clear input text when mic is toggled
+    setInputText("");
   };
 
   const analyzeAudioLevel = (stream: MediaStream) => {
@@ -319,7 +319,9 @@ export default function ChatPage() {
                 {chat.audioBlob && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">You:</span>
-                    <span>{chat.user_prompt}</span>
+                    <span style={{ fontWeight: 100, fontSize: "small" }}>
+                      {chat.user_prompt}
+                    </span>
                   </div>
                 )}
                 {chat.prompt && (
@@ -354,7 +356,7 @@ export default function ChatPage() {
                         onClick={() => handleAudioToggle(chat, index)}
                         className="flex items-center justify-center w-8 h-8 bg-transparent rounded-full cursor-pointer relative"
                       >
-                        {chat.isAudioPlaying ? <PauseIcon /> : <PlayIcon />}
+                        {chat.isAudioPlaying ? <PauseIcon /> : <SoundIcon />}
                       </button>
 
                       <button
@@ -413,7 +415,7 @@ export default function ChatPage() {
                 handleSubmit();
               }
             }}
-            disabled={micActive || isRecording} // Disable if micActive or isRecording
+            disabled={micActive || isRecording}
           />
 
           <div className="flex items-center gap-2">
@@ -423,7 +425,6 @@ export default function ChatPage() {
             <button onClick={isRecording ? stopRecording : startRecording}>
               {isRecording ? (
                 <div className="flex items-center gap-2">
-                  {/* <Equalizer audioLevel={audioLevel} /> */}
                   <SendIcon
                     className={`mic-icon cursor-pointer ${
                       micActive ? "glow-high" : ""
