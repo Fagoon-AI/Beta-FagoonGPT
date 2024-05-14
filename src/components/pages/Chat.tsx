@@ -309,7 +309,7 @@ export default function ChatPage() {
         {conversation.length === 0 ? (
           <Showcase handleSubmit={handleSubmit} />
         ) : (
-          <div className="flex flex-col gap-6 overflow-y-auto scrollbar-none h-[calc(100dvh-124px)]">
+          <div className="flex flex-col gap-6 overflow-y-auto scrollbar-none min-h-[100px] max-h-[500px]">
             {conversation.map((chat, index) => (
               <div
                 key={index}
