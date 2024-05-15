@@ -90,7 +90,7 @@ export default function ChatPage() {
     if (files && files.length > 0) {
       try {
         const fileNames = Array.from(files).map((file) => file.name);
-        setUploadedFiles(Array.from(files)); // Update uploadedFiles state
+        setUploadedFiles(Array.from(files));
         console.log("Uploaded Files:", fileNames);
       } catch (error) {
         console.error("Error handling file upload:", error);
@@ -99,15 +99,15 @@ export default function ChatPage() {
   };
 
   const toggleMic = () => {
-    setMicActive((prev) => !prev); // Check if this part is toggling micActive state correctly
+    setMicActive((prev) => !prev);
     setInputText("");
-    setUploadedFiles([]); // Ensure that uploadedFiles state is being cleared
+    setUploadedFiles([]);
   };
 
   const handleRemoveFile = (index: number) => {
     setUploadedFiles((prevUploadedFiles) => {
       const newUploadedFiles = [...prevUploadedFiles];
-      newUploadedFiles.splice(index, 1); // Remove the file at the specified index
+      newUploadedFiles.splice(index, 1);
       return newUploadedFiles;
     });
   };
@@ -142,7 +142,6 @@ export default function ChatPage() {
     );
     setScroll(false);
   };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
   };
@@ -152,7 +151,6 @@ export default function ChatPage() {
       audioElement?.pause();
       setSpeakingFalse();
     }
-
     if (typeof chat.response === "string" && !isSpeaking && !isProcessing) {
       try {
         setIsProcessing(true);
@@ -289,7 +287,6 @@ export default function ChatPage() {
     }
   };
   const glowIntensity = Math.min(1, audioLevel / 100);
-
   const stopRecording = () => {
     const mediaRecorder = mediaRecorderRef.current;
     if (!mediaRecorder) {
@@ -314,7 +311,6 @@ export default function ChatPage() {
   }, [conversation]);
 
   const iconSize = isSmallDevice ? "24" : "32";
-  const maxChatBoxHeight = 500;
   return (
     <div className="mt-14" style={{ fontFamily: "Poppins" }}>
       <Navbar />

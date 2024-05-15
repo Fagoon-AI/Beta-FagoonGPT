@@ -3,6 +3,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import HamburgerIcon from "../icons/HamburgerIcon";
 import { LogOutIcon, X } from "lucide-react";
+import Trash from "../icons/Trash";
+const demoChatTitles = [
+  "Careers in USA: freelance",
+  "Bishal Kharal: AI Engineer",
+  "About Fagoon GPT",
+  "Careers in USA: freelance",
+  "Bishal Kharal: AI Engineer",
+  "About Fagoon GPT",
+  "Careers in USA: freelance",
+  "Bishal Kharal: AI Engineer",
+  "About Fagoon GPT",
+  "Careers in USA: freelance",
+  "Bishal Kharal: AI Engineer",
+  "About Fagoon GPT",
+];
 
 export default function Navbar() {
   const router = useRouter();
@@ -14,6 +29,10 @@ export default function Navbar() {
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
+  };
+
+  const deleteChat = (title: string) => {
+    console.log(`Deleting chat: ${title}`);
   };
 
   return (
@@ -35,6 +54,29 @@ export default function Navbar() {
             >
               <X />
             </button>
+          </div>
+          <div className="overflow-y-auto" style={{ maxHeight: "75vh" }}>
+            <ul className="py-4">
+              {demoChatTitles.map((title, index) => (
+                <li
+                  key={index}
+                  className="flex justify-between items-center px-4 py-2 text-white hover:bg-gray-700 cursor-pointer"
+                >
+                  <span
+                    style={{
+                      fontWeight: 100,
+                      fontSize: "small",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    {title}
+                  </span>
+                  <button onClick={() => deleteChat(title)}>
+                    <Trash />
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
           <button
             className="absolute bottom-4 right-0 text-white py-2 px-4 mt-4 border-r-8 hover:bg-slate-700"
