@@ -9,6 +9,7 @@ import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
 import PauseIcon from "../icons/PauseIcon";
 import SoundIcon from "../icons/SoundIcon";
+import RemoveIcon from "../icons/Remove";
 import AddIcon from "../icons/Add";
 import ClipboardIcon from "../icons/CipboardIcon";
 import { Skeleton } from "../ui/skeleton";
@@ -25,6 +26,7 @@ export interface ChatMessage {
   isAudioPlaying: boolean;
   uploadedFileNames?: string[];
 }
+
 const Equalizer: React.FC<{ audioLevel: number }> = ({ audioLevel }) => {
   const lines = 5;
   const lineHeight = 6;
@@ -88,7 +90,7 @@ export default function ChatPage() {
     if (files && files.length > 0) {
       try {
         const fileNames = Array.from(files).map((file) => file.name);
-
+        setUploadedFiles(Array.from(files)); // Update uploadedFiles state
         console.log("Uploaded Files:", fileNames);
       } catch (error) {
         console.error("Error handling file upload:", error);
@@ -97,10 +99,18 @@ export default function ChatPage() {
   };
 
   const toggleMic = () => {
-    setMicActive((prev) => !prev);
+    setMicActive((prev) => !prev); // Check if this part is toggling micActive state correctly
     setInputText("");
+    setUploadedFiles([]); // Ensure that uploadedFiles state is being cleared
   };
 
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prevUploadedFiles) => {
+      const newUploadedFiles = [...prevUploadedFiles];
+      newUploadedFiles.splice(index, 1); // Remove the file at the specified index
+      return newUploadedFiles;
+    });
+  };
   const analyzeAudioLevel = (stream: MediaStream) => {
     const audioContext = new AudioContext();
     const analyzer = audioContext.createAnalyser();
@@ -216,8 +226,10 @@ export default function ChatPage() {
       console.error(error);
     } finally {
       setIsProcessing(false);
+      setUploadedFiles([]);
     }
   };
+
   const startRecording = async () => {
     if (isSpeaking) {
       audioElement?.pause();
@@ -393,21 +405,45 @@ export default function ChatPage() {
           {isRecording ? (
             <LoadingAnimation />
           ) : (
-            <label htmlFor="file-upload" className="cursor-pointer">
-              <AddIcon
-                width={isSmallDevice ? "16" : "24"}
-                className="cursor-pointer"
-                height={isSmallDevice ? "16" : "24"}
-              />
-            </label>
+            uploadedFiles.length === 0 && (
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <AddIcon
+                  width={isSmallDevice ? "16" : "24"}
+                  className="cursor-pointer"
+                  height={isSmallDevice ? "16" : "24"}
+                />
+              </label>
+            )
           )}
+
           <input
             id="file-upload"
             type="file"
-            accept=".mp3,.wav"
             className="hidden"
             onChange={handleFileUpload}
           />
+          {!micActive && !isRecording && uploadedFiles.length > 0 && (
+            <div className="rounded-lg p-2 max-w-[200px] max-h-[100px] overflow-hidden border border-gray-300">
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <RemoveIcon onClick={() => handleRemoveFile(index)} />
+                  <span
+                    className="file-name"
+                    style={{
+                      fontWeight: 400,
+                      fontSize: "14px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {file.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <input
             className="flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
             placeholder={isRecording ? "" : "What are you looking for?"}
@@ -420,7 +456,6 @@ export default function ChatPage() {
             }}
             disabled={micActive || isRecording}
           />
-
           <div className="flex items-center gap-2">
             <div
               className={cn("mic-animation", isRecording ? "listening" : "")}
