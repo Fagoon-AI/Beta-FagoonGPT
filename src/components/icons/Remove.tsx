@@ -1,9 +1,7 @@
-// RemoveIcon.tsx
-
 import React from "react";
 
 interface RemoveIconProps {
-  onClick?: () => void; // Define the onClick prop
+  onClick?: () => void;
 }
 
 const RemoveIcon: React.FC<RemoveIconProps> = ({ onClick }) => {
