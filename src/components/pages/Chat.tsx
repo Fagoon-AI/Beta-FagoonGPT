@@ -16,6 +16,7 @@ import PulseIcon from "../icons/Pulse";
 import { cn } from "@/lib/utils";
 import SendIcon from "../icons/SendIcon";
 import "./ChatPage.module.css";
+import LoadingAnimation from "../ui/loading";
 export interface ChatMessage {
   prompt: string;
   response: string | null;
@@ -389,13 +390,17 @@ export default function ChatPage() {
               : "",
           }}
         >
-          <label htmlFor="file-upload" className="cursor-pointer">
-            <AddIcon
-              width={isSmallDevice ? "16" : "24"}
-              className="cursor-pointer"
-              height={isSmallDevice ? "16" : "24"}
-            />
-          </label>
+          {isRecording ? (
+            <LoadingAnimation />
+          ) : (
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <AddIcon
+                width={isSmallDevice ? "16" : "24"}
+                className="cursor-pointer"
+                height={isSmallDevice ? "16" : "24"}
+              />
+            </label>
+          )}
           <input
             id="file-upload"
             type="file"
@@ -405,9 +410,7 @@ export default function ChatPage() {
           />
           <input
             className="flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
-            placeholder={
-              isRecording ? "Listening..." : "What are you looking for?"
-            }
+            placeholder={isRecording ? "" : "What are you looking for?"}
             value={inputText}
             onChange={handleInputChange}
             onKeyDown={(e) => {

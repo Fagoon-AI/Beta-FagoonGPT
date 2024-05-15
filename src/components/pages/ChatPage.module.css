@@ -30,3 +30,19 @@
   pointer-events: none;
   opacity: 0.6;
 }
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.mic-animation {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ff1f5a;
+  animation: pulse 1s infinite alternate;
+}
