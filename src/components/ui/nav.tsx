@@ -8,6 +8,7 @@ import Collapse from "../icons/Collapse";
 import ChatIcon from "../icons/Chat";
 import ChevronDown from "../icons/ChevronDown";
 import "./navstyle.css";
+
 const demoChatTitles = [
   "Careers in USA: freelance",
   "Bishal Kharal: AI Engineer",
@@ -26,6 +27,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [animation, setAnimation] = useState(false);
+  const [showDropDown, setShowDropDown] = useState(false); // State to manage dropdown visibility
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -45,6 +47,10 @@ export default function Navbar() {
     setAnimation(true);
   };
 
+  const toggleDropDown = () => {
+    setShowDropDown(!showDropDown);
+  };
+
   return (
     <div className="relative h-100vh">
       <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
@@ -55,10 +61,36 @@ export default function Navbar() {
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
+          onClick={toggleDropDown} // Toggle dropdown when clicked
         >
           <span className="pr-2">FagoonGPT v1.0</span>
           <ChevronDown />
         </div>
+        {showDropDown && (
+          <div className="absolute left-12 md:left-16 top-full mt-2 bg-gray-800 rounded-md shadow-lg transition-all duration-300">
+            <li
+              className="px-4 py-2 text-white flex items-center justify-between"
+              style={{ marginBottom: "8px", marginTop: "8px" }}
+            >
+              <div className="w-full py-2 px-4 mt-4 bg-2E2F">
+                <div className="flex items-center">
+                  <div className="mr-2">
+                    <Sparkle />
+                  </div>
+                  <div style={{ width: "calc(100% - 8px)" }}>
+                    <h4 className="text-lg font-semibold">FagoonGPT v2.0</h4>
+                    <p
+                      className="text-sm text-gray-400"
+                      style={{ fontSize: "12px" }}
+                    >
+                      Blazingly fast
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </div>
+        )}
       </div>
 
       <div
@@ -109,7 +141,7 @@ export default function Navbar() {
             ))}
           </ul>
         </div>
-        <div className="absolute bottom-0 w-full py-2 px-4 mt-4 border-r-8 bg-gray-900 ">
+        <div className="absolute bottom-0 w-full py-2 px-4 mt-4   bg-gray-900 ">
           <div className="flex items-center">
             <div className="mr-2">
               <Sparkle />
