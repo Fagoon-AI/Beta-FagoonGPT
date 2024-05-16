@@ -8,7 +8,7 @@ import Collapse from "../icons/Collapse";
 import ChatIcon from "../icons/Chat";
 import ChevronDown from "../icons/ChevronDown";
 import "./navstyle.css";
-
+import profile from "../img/profile.png";
 const demoChatTitles = [
   "Careers in USA: freelance",
   "Bishal Kharal: AI Engineer",
@@ -27,18 +27,17 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [animation, setAnimation] = useState(false);
-  const [showDropDown, setShowDropDown] = useState(false); // State to manage dropdown visibility
-  const dropdownRef = useRef<HTMLDivElement>(null); // Ref for dropdown element with correct type
-
+  const [showDropDown, setShowDropDown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [showuserprofile, setShowuserprofile] = useState(false);
   useEffect(() => {
     if (!isMenuOpen) {
       const timer = setTimeout(() => {
         setAnimation(false);
-      }, 500); // Duration of transition in milliseconds
+      }, 500);
       return () => clearTimeout(timer);
     }
 
-    // Event listener to close dropdown when clicking anywhere on the screen
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -64,7 +63,9 @@ export default function Navbar() {
   const toggleDropDown = () => {
     setShowDropDown(!showDropDown);
   };
-
+  const toggleuserprofile = () => {
+    setShowuserprofile(!showuserprofile);
+  };
   return (
     <div className="relative h-100vh">
       <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
@@ -75,14 +76,15 @@ export default function Navbar() {
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
-          onClick={toggleDropDown} // Toggle dropdown when clicked
+          onClick={toggleDropDown}
         >
           <span className="pr-2">FagoonGPT v1.0</span>
           <ChevronDown />
         </div>
+
         {showDropDown && (
           <div
-            ref={dropdownRef} // Assign ref to dropdown element
+            ref={dropdownRef}
             className="absolute left-12 md:left-16 top-full mt-5 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
             style={{ width: "max-content" }}
           >
@@ -131,7 +133,6 @@ export default function Navbar() {
           </div>
         )}
       </div>
-
       <div
         className="fixed top-0 left-0 z-10 w-64 h-full bg-gray-800 transform transition-transform duration-500"
         style={{
@@ -193,14 +194,38 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+      </div>{" "}
+      <div className="fixed top-4 right-0 px-4">
+        <img
+          src={profile.src}
+          style={{
+            width: "2rem",
+            height: "2rem",
+            borderRadius: "50%",
+            cursor: "pointer",
+          }}
+          onClick={toggleuserprofile}
+        />
+        {showuserprofile && (
+          <div
+            ref={dropdownRef}
+            className="absolute right-2 mt-2  bg-gray-800 rounded-md shadow-lg transition-all duration-300"
+          >
+            <li className="px-4 py-1 text-white flex items-center justify-between cursor-pointer">
+              <div className=" bg-2E2F rounded-md" onClick={handleLogout}>
+                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
+                  <div className="mr-2">
+                    <LogOutIcon />
+                  </div>
+                  <div>
+                    <h4 className="text-sm">Logout</h4>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </div>
+        )}{" "}
       </div>
-      {/* Logout Button */}
-      {/* <button
-        className="absolute bottom-4 right-0 text-white py-2 px-4 mt-4 border-r-8 hover:bg-slate-700"
-        onClick={handleLogout}
-      >
-        <LogOutIcon />
-      </button> */}
     </div>
   );
 }
