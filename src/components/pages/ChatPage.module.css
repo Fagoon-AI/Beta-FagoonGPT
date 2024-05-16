@@ -46,3 +46,6 @@
   background-color: #ff1f5a;
   animation: pulse 1s infinite alternate;
 }
+.text-custom-color {
+  color: rgb(81, 83, 86);
+}

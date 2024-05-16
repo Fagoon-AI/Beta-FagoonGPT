@@ -441,7 +441,7 @@ export default function ChatPage() {
           )}
 
           <input
-            className="flex-1 bg-transparent text-white placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
+            className="flex-1 bg-transparent placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
             placeholder={isRecording ? "" : "What are you looking for?"}
             value={inputText}
             onChange={handleInputChange}
@@ -451,7 +451,9 @@ export default function ChatPage() {
               }
             }}
             disabled={micActive || isRecording}
+            style={{ color: "#BBC1C5" }}
           />
+
           <div className="flex items-center gap-2">
             <div
               className={cn("mic-animation", isRecording ? "listening" : "")}
