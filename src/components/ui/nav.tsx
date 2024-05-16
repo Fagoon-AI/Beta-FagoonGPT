@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import HamburgerIcon from "../icons/HamburgerIcon";
 import { LogOutIcon, X } from "lucide-react";
@@ -28,6 +28,7 @@ export default function Navbar() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [animation, setAnimation] = useState(false);
   const [showDropDown, setShowDropDown] = useState(false); // State to manage dropdown visibility
+  const dropdownRef = useRef<HTMLDivElement>(null); // Ref for dropdown element with correct type
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -36,6 +37,19 @@ export default function Navbar() {
       }, 500); // Duration of transition in milliseconds
       return () => clearTimeout(timer);
     }
+
+    // Event listener to close dropdown when clicking anywhere on the screen
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropDown(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
   }, [isMenuOpen]);
 
   const handleLogout = () => {
@@ -67,23 +81,48 @@ export default function Navbar() {
           <ChevronDown />
         </div>
         {showDropDown && (
-          <div className="absolute left-12 md:left-16 top-full mt-2 bg-gray-800 rounded-md shadow-lg transition-all duration-300">
+          <div
+            ref={dropdownRef} // Assign ref to dropdown element
+            className="absolute left-12 md:left-16 top-full mt-5 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
+            style={{ width: "max-content" }}
+          >
             <li
-              className="px-4 py-2 text-white flex items-center justify-between"
-              style={{ marginBottom: "8px", marginTop: "8px" }}
+              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
+              style={{ marginBottom: "4px", marginTop: "4px" }}
             >
-              <div className="w-full py-2 px-4 mt-4 bg-2E2F">
-                <div className="flex items-center">
+              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
+                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
                   <div className="mr-2">
                     <Sparkle />
                   </div>
                   <div style={{ width: "calc(100% - 8px)" }}>
-                    <h4 className="text-lg font-semibold">FagoonGPT v2.0</h4>
+                    <h4 className="text-sm">FagoonGPT v2.0</h4>
                     <p
                       className="text-sm text-gray-400"
                       style={{ fontSize: "12px" }}
                     >
                       Blazingly fast
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li
+              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
+              style={{ marginBottom: "4px", marginTop: "4px" }}
+            >
+              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
+                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
+                  <div className="mr-2">
+                    <Sparkle />
+                  </div>
+                  <div style={{ width: "calc(100% - 8px)" }}>
+                    <h4 className="text-sm">FagoonGPT v3.0</h4>
+                    <p
+                      className="text-sm text-gray-400"
+                      style={{ fontSize: "12px" }}
+                    >
+                      Extra fast
                     </p>
                   </div>
                 </div>
