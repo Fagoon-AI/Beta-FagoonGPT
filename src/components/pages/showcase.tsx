@@ -1,5 +1,5 @@
 import { useSmallDevices } from "@/hooks/useSmallDevices";
-import TextBox from "../../components/TextBox";
+import TextBox from "../TextBox";
 import BusinessIcon from "../icons/Business";
 import CodeIcon from "../icons/Code";
 import CorrectIcon from "../icons/Correct";

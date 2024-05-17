@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import Showcase from "../../app/test2/showcase";
-import FilesIcon from "../../app/icons/Files";
-import MicIcon from "../../app/icons/Mic";
-import SearchIcon from "../../app/icons/Search";
-import Navbar from "../../app/ui/nav";
+import Showcase from "./showcase";
+import FilesIcon from "../icons/Files";
+import MicIcon from "../icons/Mic";
+import SearchIcon from "../icons/Search";
+import Navbar from "../ui/nav";
 import axios from "axios";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
-import PauseIcon from "../../app/icons/PauseIcon";
-import SoundIcon from "../../app/icons/SoundIcon";
-import RemoveIcon from "../../app/icons/Remove";
-import AddIcon from "../../app/icons/Add";
-import ClipboardIcon from "../../app/icons/CipboardIcon";
-import { Skeleton } from "../../app/ui/skeleton";
-import PulseIcon from "../../app/icons/Pulse";
+import PauseIcon from "../icons/PauseIcon";
+import SoundIcon from "../icons/SoundIcon";
+import RemoveIcon from "../icons/Remove";
+import AddIcon from "../icons/Add";
+import ClipboardIcon from "../icons/CipboardIcon";
+import { Skeleton } from "../ui/skeleton";
+import PulseIcon from "../icons/Pulse";
 import { cn } from "@/lib/utils";
-import SendIcon from "../../app/icons/SendIcon";
+import SendIcon from "../icons/SendIcon";
 import "./ChatPage.module.css";
-import LoadingAnimation from "../../app/ui/loading";
+import LoadingAnimation from "../ui/loading";
 export interface ChatMessage {
   prompt: string;
   response: string | null;
@@ -73,13 +73,11 @@ export default function ChatPage() {
   );
 
   useEffect(() => {
-    // Only execute once when the component mounts
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(analyzeAudioLevel)
       .catch((error) => console.error("Error accessing microphone:", error));
 
-    // Clean up function (optional)
     return () => {
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
@@ -357,7 +355,7 @@ export default function ChatPage() {
                 )}
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
-                    <span className="font-bold">FagoonGPT::</span>
+                    <span className="font-bold">FagoonGPT:</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.response}
                     </span>

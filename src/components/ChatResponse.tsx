@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ClipboardIcon from "../app/icons/CipboardIcon";
-import PauseIcon from "../app/icons/PauseIcon";
-import PlayIcon from "../app/icons/SoundIcon";
+import ClipboardIcon from "./icons/CipboardIcon";
+import PauseIcon from "./icons/PauseIcon";
+import PlayIcon from "./icons/SoundIcon";
 import { ChatMessage } from "./pages/Chat";
 
 interface IChatResponseProps {

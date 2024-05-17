@@ -1,6 +1,6 @@
 "use client";
-import { Button } from "@/app/ui/button";
-import { Input } from "@/app/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { login, signup } from "@/services/authService";
