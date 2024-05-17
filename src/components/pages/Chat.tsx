@@ -14,6 +14,9 @@ import ClipboardIcon from "../icons/CipboardIcon";
 import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
 import SendIcon from "../icons/SendIcon";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 export interface ChatMessage {
   prompt: string;
@@ -28,7 +31,6 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  // const [isSpeaking, setIsSpeaking] = useState(false);
   const isSpeaking = conversation.some((chat) => chat.isAudioPlaying);
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
@@ -79,8 +81,7 @@ export default function ChatPage() {
 
         const newAudio = new Audio(audioUrl);
 
-        // Wait for the audio to finish playing before proceeding
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         setAudioElement(newAudio);
         setSpeakingTrue(index);
@@ -103,8 +104,6 @@ export default function ChatPage() {
       audioElement?.pause();
       setSpeakingFalse();
     } else {
-      // audioElement?.play();
-      // setIsSpeaking(true);
       handlePlayResponse(chat, index);
     }
   };
@@ -252,8 +251,29 @@ export default function ChatPage() {
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">Fagoon:</span>
-                    <span>{chat.response}</span>
-
+                    <ReactMarkdown
+                      components={{
+                        code({ node, inline, className, children, ...props }) {
+                          const match = /language-(\w+)/.exec(className || "");
+                          return !inline && match ? (
+                            <SyntaxHighlighter
+                              style={materialDark}
+                              language={match[1]}
+                              PreTag="div"
+                              {...props}
+                            >
+                              {String(children).replace(/\n$/, "")}
+                            </SyntaxHighlighter>
+                          ) : (
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
+                          );
+                        },
+                      }}
+                    >
+                      {chat.response.replace(/\n/g, "  \n")}
+                    </ReactMarkdown>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleAudioToggle(chat, index)}
