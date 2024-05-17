@@ -8,7 +8,7 @@ import Collapse from "../icons/Collapse";
 import ChatIcon from "../icons/Chat";
 import ChevronDown from "../icons/ChevronDown";
 import "./navstyle.css";
-import profile from "../img/profile.png";
+import profile from "./profile.png";
 const demoChatTitles = [
   "Careers in USA: freelance",
   "Bishal Kharal: AI Engineer",

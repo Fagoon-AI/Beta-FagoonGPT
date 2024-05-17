@@ -7,15 +7,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      router.push("/");
-    }
-  }, []);
 
-  useEffect(() => {
-    // Remove authentication check and directly navigate to home page
-    router.push("/");
-  }, []);
+    router.push("/test");
+  }, [router]);
 
   return null;
 }

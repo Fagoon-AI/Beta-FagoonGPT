@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/ui/button";
 import {
   Form,
   FormControl,
@@ -11,14 +11,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/app/ui/form";
+import { Input } from "@/app/ui/input";
 import { signup } from "@/services/authService";
 import { redirect, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import AddIcon from "@/components/icons/Add";
+import AddIcon from "@/app/icons/Add";
 import "./globals.css";
 
 const formSchema = z.object({
