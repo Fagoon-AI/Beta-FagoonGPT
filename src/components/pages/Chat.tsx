@@ -355,7 +355,7 @@ export default function ChatPage() {
                 )}
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
-                    <span className="font-bold">FagoonGPT:</span>
+                    <span className="font-bold">FagoonGPT::</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.response}
                     </span>
