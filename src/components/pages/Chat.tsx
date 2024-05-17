@@ -26,6 +26,15 @@ export interface ChatMessage {
   isAudioPlaying: boolean;
 }
 
+// Define the props type for the code block component
+type CodeProps = {
+  node: any;
+  inline: boolean;
+  className: string;
+  children: React.ReactNode;
+  [key: string]: any;
+};
+
 export default function ChatPage() {
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
@@ -252,28 +261,28 @@ export default function ChatPage() {
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">Fagoon:</span>
                     <ReactMarkdown
-                      components={{
-                        code({ node, inline, className, children, ...props }) {
-                          const match = /language-(\w+)/.exec(className || "");
-                          return !inline && match ? (
-                            <SyntaxHighlighter
-                              style={materialDark}
-                              language={match[1]}
-                              PreTag="div"
-                              {...props}
-                            >
-                              {String(children).replace(/\n$/, "")}
-                            </SyntaxHighlighter>
-                          ) : (
-                            <code className={className} {...props}>
-                              {children}
-                            </code>
-                          );
-                        },
-                      }}
-                    >
-                      {chat.response.replace(/\n/g, "  \n")}
-                    </ReactMarkdown>
+                        components={{
+                          code({ node, inline, className, children, ...props }: CodeProps) {
+                            const match = /language-(\w+)/.exec(className || "");
+                            return !inline && match ? (
+                              <SyntaxHighlighter
+                                style={materialDark as any}  // Cast to 'any' to ensure type compatibility
+                                language={match[1]}
+                                PreTag="div"
+                                {...props}
+                              >
+                                {String(children).replace(/\n$/, "")}
+                              </SyntaxHighlighter>
+                            ) : (
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            );
+                          },
+                        }}
+                      >
+                        {chat.response.replace(/\n/g, "  \n")}
+                      </ReactMarkdown>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleAudioToggle(chat, index)}
