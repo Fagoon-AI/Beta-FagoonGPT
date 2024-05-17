@@ -15,6 +15,7 @@ import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
 import SendIcon from "../icons/SendIcon";
 import ReactMarkdown from "react-markdown";
+
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
@@ -26,20 +27,12 @@ export interface ChatMessage {
   isAudioPlaying: boolean;
 }
 
-// Define the props type for the code block component
-type CodeProps = {
-  node: any;
-  inline: boolean;
-  className: string;
-  children: React.ReactNode;
-  [key: string]: any;
-};
-
 export default function ChatPage() {
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  // const [isSpeaking, setIsSpeaking] = useState(false);
   const isSpeaking = conversation.some((chat) => chat.isAudioPlaying);
   const isSmallDevice = useSmallDevices();
   const lastChatRef = useRef<HTMLDivElement>(null);
@@ -48,6 +41,15 @@ export default function ChatPage() {
     null
   );
   const [scroll, setScroll] = useState(false);
+
+  // Define the props type for the code block component
+  type CodeProps = {
+    node: any;
+    inline: boolean;
+    className: string;
+    children: React.ReactNode;
+    [key: string]: any;
+  };
 
   const setSpeakingFalse = () => {
     setConversation((prev) =>
@@ -90,7 +92,8 @@ export default function ChatPage() {
 
         const newAudio = new Audio(audioUrl);
 
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Wait for the audio to finish playing before proceeding
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust delay as needed
 
         setAudioElement(newAudio);
         setSpeakingTrue(index);
@@ -113,6 +116,8 @@ export default function ChatPage() {
       audioElement?.pause();
       setSpeakingFalse();
     } else {
+      // audioElement?.play();
+      // setIsSpeaking(true);
       handlePlayResponse(chat, index);
     }
   };
@@ -260,7 +265,9 @@ export default function ChatPage() {
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-semibold">Fagoon:</span>
-                    <ReactMarkdown
+                    <span>
+                      {" "}
+                      <ReactMarkdown
                         components={{
                           code({ node, inline, className, children, ...props }: CodeProps) {
                             const match = /language-(\w+)/.exec(className || "");
@@ -279,10 +286,12 @@ export default function ChatPage() {
                               </code>
                             );
                           },
-                        }}
+                        } as any}
                       >
                         {chat.response.replace(/\n/g, "  \n")}
                       </ReactMarkdown>
+                    </span>
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleAudioToggle(chat, index)}
