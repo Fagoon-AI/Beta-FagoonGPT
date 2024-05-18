@@ -153,6 +153,15 @@ export default function SignupPage() {
           Login
         </span>
       </p>
+      <p className="mt-4 text-sm ">
+        Forgot Password?{" "}
+        <span
+          className="text-blue-200 hover:cursor-pointer"
+          onClick={() => router.push("/forgot")}
+        >
+          Click Here
+        </span>
+      </p>
     </div>
   );
 }
