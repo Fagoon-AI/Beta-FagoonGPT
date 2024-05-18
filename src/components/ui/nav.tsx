@@ -9,6 +9,10 @@ import ChatIcon from "../../components/icons/Chat";
 import ChevronDown from "../../components/icons/ChevronDown";
 import "./navstyle.css";
 import profile from "./profile.png";
+import { getCurrentUserAPI, refreshTokenAPI } from "@/services/authService";
+import { AxiosError } from "axios";
+import { redirect } from "next/navigation";
+import HistoryIcon from "../icons/History";
 
 const demoChatTitles = [
   "Careers in USA: freelance",
@@ -31,6 +35,7 @@ export default function Navbar() {
   const [showDropDown, setShowDropDown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showuserprofile, setShowuserprofile] = useState(false);
+  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -56,6 +61,49 @@ export default function Navbar() {
   const handleLogout = () => {
     router.push("/logout");
   };
+  const handleUnauthorizedError = async (accessToken: string) => {
+    let refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken || refreshToken === "undefined" || refreshToken === "") {
+      localStorage.setItem("accessToken", "");
+      localStorage.setItem("refreshToken", "");
+      return redirect("/login");
+    }
+    refreshToken = JSON.parse(refreshToken);
+    try {
+      const response = await refreshTokenAPI({ refreshToken } as {
+        refreshToken: string;
+      });
+      const { access_token, refresh_token } = response.data;
+      localStorage.setItem("accessToken", JSON.stringify(access_token));
+      localStorage.setItem("refreshToken", JSON.stringify(refresh_token));
+      const userData = await getCurrentUserAPI({ accessToken: access_token });
+      return userData.data;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        localStorage.setItem("accessToken", "");
+        localStorage.setItem("refreshToken", "");
+        router.push("/login");
+        router.refresh();
+        return null;
+      }
+    }
+  };
+  const isUnauthorizedError = (error: unknown) => {
+    return (
+      (error instanceof AxiosError && error.response?.status === 401) || 404
+    );
+  };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken || accessToken === "undefined" || accessToken === "") {
+      localStorage.setItem("accessToken", "");
+      localStorage.setItem("refreshToken", "");
+      redirect("/login");
+    } else {
+      getCurrentUser(JSON.parse(accessToken));
+    }
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
@@ -69,18 +117,25 @@ export default function Navbar() {
   const toggleuserprofile = () => {
     setShowuserprofile((prev) => !prev);
   };
-
+  const getCurrentUser = async (accessToken: string) => {
+    try {
+      const response = await getCurrentUserAPI({ accessToken });
+      setUsername(response.data.username);
+      return response.data;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        return await handleUnauthorizedError(accessToken);
+      }
+      throw error;
+    }
+  };
   return (
     <div className="relative h-100vh">
-      <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
-        <div onClick={toggleMenu}>
-          <HamburgerIcon isMenuOpen={isMenuOpen} />
-        </div>
+      <div className="fixed top-6 left-0 z-10 w-full flex items-center px-4">
         <div
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
-          onClick={toggleDropDown}
         >
           <span className="pr-2">FagoonGPT v1.0</span>
           <ChevronDown />
@@ -91,6 +146,8 @@ export default function Navbar() {
             ref={dropdownRef}
             className="absolute left-12 md:left-16 top-full mt-3 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
             style={{ width: "max-content" }}
+            onMouseEnter={toggleDropDown}
+            onMouseLeave={toggleDropDown}
           >
             <li
               className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
@@ -109,27 +166,6 @@ export default function Navbar() {
                       style={{ fontSize: "12px" }}
                     >
                       Blazingly fast
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li
-              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
-              style={{ marginBottom: "4px", marginTop: "4px" }}
-            >
-              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
-                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
-                  <div className="mr-2">
-                    <Sparkle />
-                  </div>
-                  <div style={{ width: "calc(100% - 8px)" }}>
-                    <h4 className="text-sm">FagoonGPT v3.0</h4>
-                    <p
-                      className="text-sm text-gray-400"
-                      style={{ fontSize: "12px" }}
-                    >
-                      Extra fast
                     </p>
                   </div>
                 </div>
@@ -177,7 +213,6 @@ export default function Navbar() {
                 <span style={{ fontWeight: 100, fontSize: "small" }}>
                   {title}
                 </span>
-                <span>{title}</span>
                 {hoveredIndex === index && (
                   <div className="ml-2 text-gray-400 hover:text-white">
                     <Trash />
@@ -189,35 +224,14 @@ export default function Navbar() {
         </div>
       </div>{" "}
       <div
-        className="fixed top-4 right-0 px-4"
+        className="fixed top-6  right-2 px-4 flex flex-row ..."
         onMouseEnter={() => setHoveredIndex(1)}
         onMouseLeave={() => setHoveredIndex(null)}
       >
-        <div className="absolute bottom-0 w-full py-2 px-4 mt-4   bg-gray-900 ">
-          <div className="flex items-center">
-            <div className="mr-2">
-              <Sparkle />
-            </div>
-            <div style={{ width: "calc(100% - 8px)" }}>
-              <h4 className="text-lg font-semibold">Upgrade Plan</h4>
-              <p className="text-sm text-gray-400" style={{ fontSize: "12px" }}>
-                Get FagoonGPT V2 and more
-              </p>
-            </div>
-          </div>
+        <div onClick={toggleMenu}>
+          <HistoryIcon isMenuOpen={isMenuOpen} />
         </div>
-      </div>{" "}
-      <div className="fixed top-4 right-0 px-4">
-        <img
-          src={profile.src}
-          style={{
-            width: "2rem",
-            height: "2rem",
-            borderRadius: "51%",
-            cursor: "pointer",
-          }}
-          onClick={toggleuserprofile}
-        />
+        <div>{username !== "" && <h1>{username.split(" ")[0]}</h1>}</div>
         {showuserprofile && (
           <div
             ref={dropdownRef}

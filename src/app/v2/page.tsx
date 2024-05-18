@@ -13,24 +13,12 @@ import SoundIcon from "../../components/icons/SoundIcon";
 import RemoveIcon from "../../components/icons/Remove";
 import AddIcon from "../../components/icons/Add";
 import ClipboardIcon from "../../components/icons/CipboardIcon";
-<<<<<<< HEAD
-=======
-import CopyIcon from "../../components/icons/CopyIcon";
->>>>>>> fagoongpt/master
 import { Skeleton } from "../ui/skeleton";
 import PulseIcon from "../../components/icons/Pulse";
 import { cn } from "@/lib/utils";
 import SendIcon from "../../components/icons/SendIcon";
 import "./ChatPage.module.css";
 import LoadingAnimation from "../ui/loading";
-<<<<<<< HEAD
-=======
-
-import ReactMarkdown from "react-markdown";
-
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
->>>>>>> fagoongpt/master
 export interface ChatMessage {
   prompt: string;
   response: string | null;
@@ -98,19 +86,6 @@ export default function ChatPage() {
     };
   }, []);
   const [scroll, setScroll] = useState(false);
-<<<<<<< HEAD
-=======
-
-  // Define the props type for the code block component
-  type CodeProps = {
-    node: any;
-    inline: boolean;
-    className: string;
-    children: React.ReactNode;
-    [key: string]: any;
-  };
-
->>>>>>> fagoongpt/master
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -137,10 +112,6 @@ export default function ChatPage() {
       return newUploadedFiles;
     });
   };
-<<<<<<< HEAD
-=======
-
->>>>>>> fagoongpt/master
   const analyzeAudioLevel = (stream: MediaStream) => {
     const audioContext = new AudioContext();
     const analyzer = audioContext.createAnalyser();
@@ -342,11 +313,7 @@ export default function ChatPage() {
 
   const iconSize = isSmallDevice ? "24" : "32";
   return (
-<<<<<<< HEAD
     <div className="mt-14" style={{ fontFamily: "Poppins" }}>
-=======
-    <div className="mt-14">
->>>>>>> fagoongpt/master
       <Navbar />
       <main className={`flex flex-col justify-between h-100dvh`}>
         {conversation.length === 0 ? (
@@ -362,107 +329,36 @@ export default function ChatPage() {
                 {chat.audioBlob && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">You:</span>
-<<<<<<< HEAD
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.user_prompt}
                     </span>
-=======
-                    <span>{chat.user_prompt}</span>
->>>>>>> fagoongpt/master
                   </div>
                 )}
                 {chat.prompt && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">You:</span>
-<<<<<<< HEAD
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.prompt}
                     </span>
-=======
-                    <span>{chat.prompt}</span>
->>>>>>> fagoongpt/master
                   </div>
                 )}
                 {chat.prompt === "Uploaded Files:" && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     {uploadedFiles.map((file, i) => (
-<<<<<<< HEAD
                       <span
                         key={i}
                         style={{ fontWeight: 100, fontSize: "small" }}
                       >
                         {file.name}
                       </span>
-=======
-                      <span key={i}>{file.name}</span>
->>>>>>> fagoongpt/master
                     ))}
                   </div>
                 )}
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">FagoonGPT v2.0:</span>
-<<<<<<< HEAD
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.response}
-=======
-                    <span>
-                      {" "}
-                      <ReactMarkdown
-                        components={
-                          {
-                            code({
-                              node,
-                              inline,
-                              className,
-                              children,
-                              ...props
-                            }: CodeProps) {
-                              const match = /language-(\w+)/.exec(
-                                className || ""
-                              );
-                              const codeContent = String(children).replace(
-                                /\n$/,
-                                ""
-                              );
-
-                              const handleCopyCode = () => {
-                                navigator.clipboard.writeText(codeContent);
-                                toast.success("Code copied to clipboard");
-                              };
-
-                              return !inline && match ? (
-                                <div className="relative">
-                                  <SyntaxHighlighter
-                                    style={materialDark as any}
-                                    language={match[1]}
-                                    PreTag="div"
-                                    {...props}
-                                  >
-                                    {codeContent}
-                                  </SyntaxHighlighter>
-                                  <span className="absolute top-2 right-10 p-1  text-white text-sm ">
-                                    Copy
-                                  </span>
-                                  <button
-                                    onClick={handleCopyCode}
-                                    className="absolute top-2 right-2 p-1 bg-gray-800 rounded-full text-white text-sm focus:outline-none hover:bg-gray-600"
-                                  >
-                                    <CopyIcon />
-                                  </button>
-                                </div>
-                              ) : (
-                                <code className={className} {...props}>
-                                  {children}
-                                </code>
-                              );
-                            },
-                          } as any
-                        }
-                      >
-                        {chat.response.replace(/\n/g, "  \n")}
-                      </ReactMarkdown>
->>>>>>> fagoongpt/master
                     </span>
 
                     <div className="flex items-center gap-2">

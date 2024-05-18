@@ -30,10 +30,7 @@ export default function Navbar() {
   const [showDropDown, setShowDropDown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showuserprofile, setShowuserprofile] = useState(false);
-<<<<<<< HEAD
 
-=======
->>>>>>> fagoongpt/master
   useEffect(() => {
     if (!isMenuOpen) {
       const timer = setTimeout(() => {
@@ -65,7 +62,6 @@ export default function Navbar() {
   };
 
   const toggleDropDown = () => {
-<<<<<<< HEAD
     setShowDropDown((prev) => !prev);
   };
 
@@ -73,13 +69,6 @@ export default function Navbar() {
     setShowuserprofile((prev) => !prev);
   };
 
-=======
-    setShowDropDown(!showDropDown);
-  };
-  const toggleuserprofile = () => {
-    setShowuserprofile(!showuserprofile);
-  };
->>>>>>> fagoongpt/master
   return (
     <div className="relative h-100vh">
       <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
@@ -90,12 +79,8 @@ export default function Navbar() {
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
-<<<<<<< HEAD
           onMouseEnter={toggleDropDown}
           onMouseLeave={toggleDropDown}
-=======
-          onClick={toggleDropDown}
->>>>>>> fagoongpt/master
         >
           <span className="pr-2">FagoonGPT v2.0</span>
           <ChevronDown />
@@ -104,15 +89,10 @@ export default function Navbar() {
         {showDropDown && (
           <div
             ref={dropdownRef}
-<<<<<<< HEAD
             className="absolute left-12 md:left-16 top-full mt-3 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
             style={{ width: "max-content" }}
             onMouseEnter={toggleDropDown}
             onMouseLeave={toggleDropDown}
-=======
-            className="absolute left-12 md:left-16 top-full mt-5 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
-            style={{ width: "max-content" }}
->>>>>>> fagoongpt/master
           >
             <li
               className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
@@ -130,32 +110,7 @@ export default function Navbar() {
                       className="text-sm text-gray-400"
                       style={{ fontSize: "12px" }}
                     >
-<<<<<<< HEAD
                       Normal Model
-=======
-                      Blazingly fast
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li
-              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
-              style={{ marginBottom: "4px", marginTop: "4px" }}
-            >
-              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
-                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
-                  <div className="mr-2">
-                    <Sparkle />
-                  </div>
-                  <div style={{ width: "calc(100% - 8px)" }}>
-                    <h4 className="text-sm">FagoonGPT v3.0</h4>
-                    <p
-                      className="text-sm text-gray-400"
-                      style={{ fontSize: "12px" }}
-                    >
-                      Extra fast
->>>>>>> fagoongpt/master
                     </p>
                   </div>
                 </div>
@@ -200,13 +155,9 @@ export default function Navbar() {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-<<<<<<< HEAD
                 <span style={{ fontWeight: 100, fontSize: "small" }}>
                   {title}
                 </span>
-=======
-                <span>{title}</span>
->>>>>>> fagoongpt/master
                 {hoveredIndex === index && (
                   <div className="ml-2 text-gray-400 hover:text-white">
                     <Trash />
@@ -216,7 +167,6 @@ export default function Navbar() {
             ))}
           </ul>
         </div>
-<<<<<<< HEAD
       </div>{" "}
       <div
         className="fixed top-4 right-0 px-4"
@@ -225,23 +175,6 @@ export default function Navbar() {
         onMouseEnter={toggleuserprofile}
         onMouseLeave={toggleuserprofile}
       >
-=======
-        <div className="absolute bottom-0 w-full py-2 px-4 mt-4   bg-gray-900 ">
-          <div className="flex items-center">
-            <div className="mr-2">
-              <Sparkle />
-            </div>
-            <div style={{ width: "calc(100% - 8px)" }}>
-              <h4 className="text-lg font-semibold">Upgrade Plan</h4>
-              <p className="text-sm text-gray-400" style={{ fontSize: "12px" }}>
-                Get FagoonGPT V2 and more
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>{" "}
-      <div className="fixed top-4 right-0 px-4">
->>>>>>> fagoongpt/master
         <img
           src={profile.src}
           style={{
@@ -255,11 +188,7 @@ export default function Navbar() {
         {showuserprofile && (
           <div
             ref={dropdownRef}
-<<<<<<< HEAD
             className="absolute right-2 mt-0 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
-=======
-            className="absolute right-2 mt-2  bg-gray-800 rounded-md shadow-lg transition-all duration-300"
->>>>>>> fagoongpt/master
           >
             <li className="px-4 py-1 text-white flex items-center justify-between cursor-pointer">
               <div className=" bg-2E2F rounded-md" onClick={handleLogout}>
