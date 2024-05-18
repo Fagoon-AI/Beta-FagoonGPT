@@ -216,11 +216,9 @@ export default function ChatPage() {
     try {
       setIsProcessing(true);
 
-      // Determine the request body based on whether files are present
       let requestBody;
       let contentType;
       if (uploadedFiles.length > 0) {
-        // Construct FormData for file uploads
         const formData = new FormData();
         formData.append("prompt", prompt || inputText);
         uploadedFiles.forEach((file) => {
@@ -229,7 +227,6 @@ export default function ChatPage() {
         requestBody = formData;
         contentType = "multipart/form-data";
       } else {
-        // No files, send a simple JSON payload
         requestBody = { prompt: prompt || inputText };
         contentType = "application/json";
       }
@@ -362,6 +359,20 @@ export default function ChatPage() {
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.user_prompt}
                     </span>
+                    {chat.uploadedFileNames &&
+                      chat.uploadedFileNames.length > 0 && (
+                        <div className="flex flex-col gap-1 px-4 rounded-lg">
+                          <span className="font-bold">Uploaded Files:</span>
+                          {chat.uploadedFileNames.map((fileName, i) => (
+                            <span
+                              key={i}
+                              style={{ fontWeight: 100, fontSize: "small" }}
+                            >
+                              {fileName}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 )}
                 {chat.prompt && (
@@ -369,7 +380,37 @@ export default function ChatPage() {
                     <span className="font-bold">You:</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.prompt}
-                    </span>
+                    </span>{" "}
+                    {chat.uploadedFileNames &&
+                      chat.uploadedFileNames.length > 0 && (
+                        <div
+                          className="flex flex-col gap-1 px-4 rounded-lg"
+                          style={{
+                            border: "1px solid grey",
+                            padding: "8px",
+                            width: "30%",
+                          }}
+                        >
+                          <span
+                            className="font-bold"
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#D3D3D3",
+                            }}
+                          >
+                            Source:
+                          </span>
+                          {chat.uploadedFileNames.map((fileName, i) => (
+                            <span
+                              key={i}
+                              style={{ fontWeight: 100, fontSize: "small" }}
+                            >
+                              {fileName}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 )}
                 {chat.prompt === "Uploaded Files:" && (

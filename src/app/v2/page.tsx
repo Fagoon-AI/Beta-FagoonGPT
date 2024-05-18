@@ -161,7 +161,7 @@ export default function ChatPage() {
         const audioResponse = await axios.post(
           "https://gpt.aifagoon.com/api/fagoonchat_audio/",
           { chat: chat.response },
-          { responseType: "blob" }
+          { responssleType: "blob" }
         );
 
         const audioBlob = new Blob([audioResponse.data], {
