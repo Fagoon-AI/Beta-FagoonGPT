@@ -13,12 +13,18 @@ import SoundIcon from "../../components/icons/SoundIcon";
 import RemoveIcon from "../../components/icons/Remove";
 import AddIcon from "../../components/icons/Add";
 import ClipboardIcon from "../../components/icons/CipboardIcon";
+import CopyIcon from "../../components/icons/CopyIcon";
 import { Skeleton } from "../ui/skeleton";
 import PulseIcon from "../../components/icons/Pulse";
 import { cn } from "@/lib/utils";
 import SendIcon from "../../components/icons/SendIcon";
 import "./ChatPage.module.css";
 import LoadingAnimation from "../ui/loading";
+
+import ReactMarkdown from "react-markdown";
+
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 export interface ChatMessage {
   prompt: string;
   response: string | null;
@@ -86,6 +92,16 @@ export default function ChatPage() {
     };
   }, []);
   const [scroll, setScroll] = useState(false);
+
+  // Define the props type for the code block component
+  type CodeProps = {
+    node: any;
+    inline: boolean;
+    className: string;
+    children: React.ReactNode;
+    [key: string]: any;
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -112,6 +128,7 @@ export default function ChatPage() {
       return newUploadedFiles;
     });
   };
+
   const analyzeAudioLevel = (stream: MediaStream) => {
     const audioContext = new AudioContext();
     const analyzer = audioContext.createAnalyser();
@@ -348,7 +365,63 @@ export default function ChatPage() {
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">FagoonGPT v2.0:</span>
-                    <span>{chat.response}</span>
+                    <span>
+                      {" "}
+                      <ReactMarkdown
+                        components={
+                          {
+                            code({
+                              node,
+                              inline,
+                              className,
+                              children,
+                              ...props
+                            }: CodeProps) {
+                              const match = /language-(\w+)/.exec(
+                                className || ""
+                              );
+                              const codeContent = String(children).replace(
+                                /\n$/,
+                                ""
+                              );
+
+                              const handleCopyCode = () => {
+                                navigator.clipboard.writeText(codeContent);
+                                toast.success("Code copied to clipboard");
+                              };
+
+                              return !inline && match ? (
+                                <div className="relative">
+                                  <SyntaxHighlighter
+                                    style={materialDark as any}
+                                    language={match[1]}
+                                    PreTag="div"
+                                    {...props}
+                                  >
+                                    {codeContent}
+                                  </SyntaxHighlighter>
+                                  <span className="absolute top-2 right-10 p-1  text-white text-sm ">
+                                    Copy
+                                  </span>
+                                  <button
+                                    onClick={handleCopyCode}
+                                    className="absolute top-2 right-2 p-1 bg-gray-800 rounded-full text-white text-sm focus:outline-none hover:bg-gray-600"
+                                  >
+                                    <CopyIcon />
+                                  </button>
+                                </div>
+                              ) : (
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                          } as any
+                        }
+                      >
+                        {chat.response.replace(/\n/g, "  \n")}
+                      </ReactMarkdown>
+                    </span>
 
                     <div className="flex items-center gap-2">
                       <button
