@@ -91,6 +91,7 @@ export default function Navbar() {
             <li
               className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
               style={{ marginBottom: "4px", marginTop: "4px" }}
+              onClick={() => router.push("/v2")}
             >
               <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
                 <div className="flex items-center hover:bg-gray-700 rounded-md p-2">

@@ -78,7 +78,7 @@ export default function Navbar() {
           onMouseLeave={() => setHoveredIndex(null)}
           onClick={toggleDropDown}
         >
-          <span className="pr-2">FagoonGPT v1.0</span>
+          <span className="pr-2">FagoonGPT v2.0</span>
           <ChevronDown />
         </div>
 
@@ -91,6 +91,7 @@ export default function Navbar() {
             <li
               className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
               style={{ marginBottom: "4px", marginTop: "4px" }}
+              onClick={() => router.push("/")}
             >
               <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
                 <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
@@ -98,7 +99,7 @@ export default function Navbar() {
                     <Sparkle />
                   </div>
                   <div style={{ width: "calc(100% - 8px)" }}>
-                    <h4 className="text-sm">FagoonGPT v2.0</h4>
+                    <h4 className="text-sm">FagoonGPT v1.0</h4>
                     <p
                       className="text-sm text-gray-400"
                       style={{ fontSize: "12px" }}
