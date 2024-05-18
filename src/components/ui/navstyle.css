@@ -1,0 +1,11 @@
+.hovered-div {
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px;
+}
+
+.hovered-div:hover {
+  background-color: #374151;
+  border-radius: 8px;
+  padding: 8px;
+}

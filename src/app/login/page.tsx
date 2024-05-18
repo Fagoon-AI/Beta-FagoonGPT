@@ -70,12 +70,15 @@ export default function LoginPage() {
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="w-full max-w-md p-6 bg-transparent rounded-lg shadow-lg">
-        <h1 className="md:text-2xl text-xl bg-gradient-to-br from-[#B664DB] via-[#DDDDDD] to-[#FF3F9B] bg-clip-text text-transparent">Fagoon</h1>
-        <h2 className="mt-4 text-2xl">
-          Login to your account
-        </h2>
+        <h1 className="md:text-2xl text-xl bg-gradient-to-br from-[#B664DB] via-[#DDDDDD] to-[#FF3F9B] bg-clip-text text-transparent">
+          Fagoon
+        </h1>
+        <h2 className="mt-4 text-2xl">Login to your account</h2>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 mt-8"
+          >
             <FormField
               control={form.control}
               name="email"
@@ -120,6 +123,15 @@ export default function LoginPage() {
             onClick={() => router.push("/signup")}
           >
             Signup
+          </span>
+        </p>
+        <p className="mt-4 text-sm text-center">
+          Forgot Password?{" "}
+          <span
+            className="text-blue-200 hover:cursor-pointer"
+            onClick={() => router.push("/forgot")}
+          >
+            Click Here
           </span>
         </p>
       </div>
