@@ -182,7 +182,7 @@ export default function Navbar() {
           style={{
             width: "2rem",
             height: "2rem",
-            borderRadius: "50%",
+            borderRadius: "51%",
             cursor: "pointer",
           }}
           onClick={toggleuserprofile}
