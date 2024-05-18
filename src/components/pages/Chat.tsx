@@ -380,7 +380,7 @@ export default function ChatPage() {
                     <span className="font-bold">You:</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.prompt}
-                    </span>{" "}
+                    </span>
                     {chat.uploadedFileNames &&
                       chat.uploadedFileNames.length > 0 && (
                         <div
