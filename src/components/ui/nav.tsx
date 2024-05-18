@@ -9,10 +9,6 @@ import ChatIcon from "../../components/icons/Chat";
 import ChevronDown from "../../components/icons/ChevronDown";
 import "./navstyle.css";
 import profile from "./profile.png";
-import { getCurrentUserAPI, refreshTokenAPI } from "@/services/authService";
-import { AxiosError } from "axios";
-import { redirect } from "next/navigation";
-import HistoryIcon from "../icons/History";
 
 const demoChatTitles = [
   "Careers in USA: freelance",
@@ -35,7 +31,6 @@ export default function Navbar() {
   const [showDropDown, setShowDropDown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showuserprofile, setShowuserprofile] = useState(false);
-  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -61,49 +56,6 @@ export default function Navbar() {
   const handleLogout = () => {
     router.push("/logout");
   };
-  const handleUnauthorizedError = async (accessToken: string) => {
-    let refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken || refreshToken === "undefined" || refreshToken === "") {
-      localStorage.setItem("accessToken", "");
-      localStorage.setItem("refreshToken", "");
-      return redirect("/login");
-    }
-    refreshToken = JSON.parse(refreshToken);
-    try {
-      const response = await refreshTokenAPI({ refreshToken } as {
-        refreshToken: string;
-      });
-      const { access_token, refresh_token } = response.data;
-      localStorage.setItem("accessToken", JSON.stringify(access_token));
-      localStorage.setItem("refreshToken", JSON.stringify(refresh_token));
-      const userData = await getCurrentUserAPI({ accessToken: access_token });
-      return userData.data;
-    } catch (error) {
-      if (isUnauthorizedError(error)) {
-        localStorage.setItem("accessToken", "");
-        localStorage.setItem("refreshToken", "");
-        router.push("/login");
-        router.refresh();
-        return null;
-      }
-    }
-  };
-  const isUnauthorizedError = (error: unknown) => {
-    return (
-      (error instanceof AxiosError && error.response?.status === 401) || 404
-    );
-  };
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken || accessToken === "undefined" || accessToken === "") {
-      localStorage.setItem("accessToken", "");
-      localStorage.setItem("refreshToken", "");
-      redirect("/login");
-    } else {
-      getCurrentUser(JSON.parse(accessToken));
-    }
-  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
@@ -117,25 +69,19 @@ export default function Navbar() {
   const toggleuserprofile = () => {
     setShowuserprofile((prev) => !prev);
   };
-  const getCurrentUser = async (accessToken: string) => {
-    try {
-      const response = await getCurrentUserAPI({ accessToken });
-      setUsername(response.data.username);
-      return response.data;
-    } catch (error) {
-      if (isUnauthorizedError(error)) {
-        return await handleUnauthorizedError(accessToken);
-      }
-      throw error;
-    }
-  };
+
   return (
     <div className="relative h-100vh">
-      <div className="fixed top-6 left-0 z-10 w-full flex items-center px-4">
+      <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
+        <div onClick={toggleMenu}>
+          <HamburgerIcon isMenuOpen={isMenuOpen} />
+        </div>
         <div
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
+          onMouseEnter={toggleDropDown}
+          onMouseLeave={toggleDropDown}
         >
           <span className="pr-2">FagoonGPT v1.0</span>
           <ChevronDown />
@@ -224,14 +170,23 @@ export default function Navbar() {
         </div>
       </div>{" "}
       <div
-        className="fixed top-6  right-2 px-4 flex flex-row ..."
+        className="fixed top-4 right-0 px-4"
+        className="fixed top-4 right-0 px-4"
         onMouseEnter={() => setHoveredIndex(1)}
         onMouseLeave={() => setHoveredIndex(null)}
+        onMouseEnter={toggleuserprofile}
+        onMouseLeave={toggleuserprofile}
       >
-        <div onClick={toggleMenu}>
-          <HistoryIcon isMenuOpen={isMenuOpen} />
-        </div>
-        <div>{username !== "" && <h1>{username.split(" ")[0]}</h1>}</div>
+        <img
+          src={profile.src}
+          style={{
+            width: "2rem",
+            height: "2rem",
+            borderRadius: "51%",
+            cursor: "pointer",
+          }}
+          onClick={toggleuserprofile}
+        />
         {showuserprofile && (
           <div
             ref={dropdownRef}
