@@ -110,27 +110,6 @@ export default function Navbar() {
                 </div>
               </div>
             </li>
-            <li
-              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
-              style={{ marginBottom: "4px", marginTop: "4px" }}
-            >
-              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
-                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
-                  <div className="mr-2">
-                    <Sparkle />
-                  </div>
-                  <div style={{ width: "calc(100% - 8px)" }}>
-                    <h4 className="text-sm">FagoonGPT v3.0</h4>
-                    <p
-                      className="text-sm text-gray-400"
-                      style={{ fontSize: "12px" }}
-                    >
-                      Extra fast
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </li>
           </div>
         )}
       </div>
@@ -181,19 +160,6 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-        </div>
-        <div className="absolute bottom-0 w-full py-2 px-4 mt-4   bg-gray-900 ">
-          <div className="flex items-center">
-            <div className="mr-2">
-              <Sparkle />
-            </div>
-            <div style={{ width: "calc(100% - 8px)" }}>
-              <h4 className="text-lg font-semibold">Upgrade Plan</h4>
-              <p className="text-sm text-gray-400" style={{ fontSize: "12px" }}>
-                Get FagoonGPT V2 and more
-              </p>
-            </div>
-          </div>
         </div>
       </div>{" "}
       <div className="fixed top-4 right-0 px-4">
