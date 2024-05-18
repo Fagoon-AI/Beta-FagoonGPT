@@ -7,6 +7,7 @@ import Sparkle from "../../components/icons/Sparkle";
 import Collapse from "../../components/icons/Collapse";
 import ChatIcon from "../../components/icons/Chat";
 import ChevronDown from "../../components/icons/ChevronDown";
+import HistoryIcon from "@/components/icons/History";
 import "./navstyle.css";
 import profile from "./profile.png";
 const demoChatTitles = [
@@ -72,13 +73,11 @@ export default function Navbar() {
   return (
     <div className="relative h-100vh">
       <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
-        <div onClick={toggleMenu}>
+        {/* <div onClick={toggleMenu}>
           <HamburgerIcon isMenuOpen={isMenuOpen} />
-        </div>
+        </div> */}
         <div
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
-          onMouseEnter={() => setHoveredIndex(1)}
-          onMouseLeave={() => setHoveredIndex(null)}
           onMouseEnter={toggleDropDown}
           onMouseLeave={toggleDropDown}
         >
@@ -170,22 +169,13 @@ export default function Navbar() {
       </div>{" "}
       <div
         className="fixed top-4 right-0 px-4"
-        onMouseEnter={() => setHoveredIndex(1)}
-        onMouseLeave={() => setHoveredIndex(null)}
-        onMouseEnter={toggleuserprofile}
-        onMouseLeave={toggleuserprofile}
+        // onMouseEnter={toggleuserprofile}
+        // onMouseLeave={toggleuserprofile}
       >
-        <img
-          src={profile.src}
-          style={{
-            width: "2rem",
-            height: "2rem",
-            borderRadius: "50%",
-            cursor: "pointer",
-          }}
-          onClick={toggleuserprofile}
-        />
-        {showuserprofile && (
+        <div onClick={toggleMenu}>
+          <HistoryIcon isMenuOpen={isMenuOpen} />
+        </div>
+        {/* {showuserprofile && (
           <div
             ref={dropdownRef}
             className="absolute right-2 mt-0 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
@@ -203,7 +193,7 @@ export default function Navbar() {
               </div>
             </li>
           </div>
-        )}{" "}
+        )}{" "} */}
       </div>
     </div>
   );

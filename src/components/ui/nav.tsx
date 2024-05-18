@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import HamburgerIcon from "../../components/icons/HamburgerIcon";
 import { LogOutIcon, X } from "lucide-react";
 import Trash from "../../components/icons/Trash";
@@ -9,7 +9,10 @@ import ChatIcon from "../../components/icons/Chat";
 import ChevronDown from "../../components/icons/ChevronDown";
 import "./navstyle.css";
 import profile from "./profile.png";
-
+import { getCurrentUserAPI, refreshTokenAPI } from "@/services/authService";
+import { AxiosError } from "axios";
+import HistoryIcon from "../icons/History";
+import ProfileIcon from "../icons/Profile";
 const demoChatTitles = [
   "Careers in USA: freelance",
   "Bishal Kharal: AI Engineer",
@@ -31,6 +34,64 @@ export default function Navbar() {
   const [showDropDown, setShowDropDown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showuserprofile, setShowuserprofile] = useState(false);
+  const [full_name, setFull_name] = useState<string>("");
+
+  const getCurrentUser = async (accessToken: string) => {
+    try {
+      const response = await getCurrentUserAPI({ accessToken });
+      setFull_name(response.data.full_name);
+      return response.data;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        return await handleUnauthorizedError(accessToken);
+      }
+      throw error;
+    }
+  };
+  const handleUnauthorizedError = async (accessToken: string) => {
+    let refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken || refreshToken === "undefined" || refreshToken === "") {
+      localStorage.setItem("accessToken", "");
+      localStorage.setItem("refreshToken", "");
+      return redirect("/login");
+    }
+    refreshToken = JSON.parse(refreshToken);
+    try {
+      const response = await refreshTokenAPI({ refreshToken } as {
+        refreshToken: string;
+      });
+      const { access_token, refresh_token } = response.data;
+      localStorage.setItem("accessToken", JSON.stringify(access_token));
+      localStorage.setItem("refreshToken", JSON.stringify(refresh_token));
+      const userData = await getCurrentUserAPI({ accessToken: access_token });
+      return userData.data;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        localStorage.setItem("accessToken", "");
+        localStorage.setItem("refreshToken", "");
+        router.push("/login");
+        router.refresh();
+        return null;
+      }
+    }
+  };
+
+  const isUnauthorizedError = (error: unknown) => {
+    return (
+      (error instanceof AxiosError && error.response?.status === 401) || 404
+    );
+  };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken || accessToken === "undefined" || accessToken === "") {
+      localStorage.setItem("accessToken", "");
+      localStorage.setItem("refreshToken", "");
+      redirect("/login");
+    } else {
+      getCurrentUser(JSON.parse(accessToken));
+    }
+  }, []);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -73,13 +134,11 @@ export default function Navbar() {
   return (
     <div className="relative h-100vh">
       <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
-        <div onClick={toggleMenu}>
+        {/* <div onClick={toggleMenu}>
           <HamburgerIcon isMenuOpen={isMenuOpen} />
-        </div>
+        </div> */}
         <div
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
-          onMouseEnter={() => setHoveredIndex(1)}
-          onMouseLeave={() => setHoveredIndex(null)}
           onMouseEnter={toggleDropDown}
           onMouseLeave={toggleDropDown}
         >
@@ -168,42 +227,29 @@ export default function Navbar() {
             ))}
           </ul>
         </div>
-      </div>{" "}
-      <div
-        className="fixed top-4 right-0 px-4"
-        className="fixed top-4 right-0 px-4"
-        onMouseEnter={() => setHoveredIndex(1)}
-        onMouseLeave={() => setHoveredIndex(null)}
-        onMouseEnter={toggleuserprofile}
-        onMouseLeave={toggleuserprofile}
-      >
-        <img
-          src={profile.src}
+      </div>
+      <div className="fixed top-4 right-0 px-4 flex flex-column ...">
+        <div onClick={toggleMenu} style={{ marginRight: "20px" }}>
+          <HistoryIcon isMenuOpen={isMenuOpen} />
+        </div>
+        <div
           style={{
-            width: "2rem",
-            height: "2rem",
-            borderRadius: "51%",
-            cursor: "pointer",
+            // border: "1px solid grey",
+            padding: "2px",
+            display: "flex",
+            flexDirection: "row",
           }}
-          onClick={toggleuserprofile}
-        />
+          onMouseEnter={toggleuserprofile}
+          onMouseLeave={toggleuserprofile}
+        >
+          <ProfileIcon></ProfileIcon> <p> {full_name}</p>
+        </div>
         {showuserprofile && (
           <div
             ref={dropdownRef}
             className="absolute right-2 mt-2  bg-gray-800 rounded-md shadow-lg transition-all duration-300"
           >
-            <li className="px-4 py-1 text-white flex items-center justify-between cursor-pointer">
-              <div className=" bg-2E2F rounded-md" onClick={handleLogout}>
-                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
-                  <div className="mr-2">
-                    <LogOutIcon />
-                  </div>
-                  <div>
-                    <h4 className="text-sm">Logout</h4>
-                  </div>
-                </div>
-              </div>
-            </li>
+            {/* <div>{full_name !== "" && <p> {full_name.split(" ")[0]}</p>}</div> */}
           </div>
         )}{" "}
       </div>

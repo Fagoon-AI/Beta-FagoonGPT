@@ -99,11 +99,9 @@ export default function ChatPage() {
   };
 
   const toggleMic = () => {
-    // If recording is already in progress, stop recording
     if (isRecording) {
       stopRecording();
     } else {
-      // If not recording, start recording
       startRecording();
     }
   };
@@ -200,7 +198,11 @@ export default function ChatPage() {
   };
   const handleSubmit = async (prompt?: string) => {
     setInputText("");
-    if (!prompt && inputText.trim() === "") return;
+
+    if (!prompt && inputText.trim() === "" && uploadedFiles.length === 0) {
+      toast.error("Please enter a message or upload a file.");
+      return;
+    }
 
     const newChat: ChatMessage = {
       prompt: prompt || inputText,
@@ -214,24 +216,48 @@ export default function ChatPage() {
     try {
       setIsProcessing(true);
 
+      // Determine the request body based on whether files are present
+      let requestBody;
+      let contentType;
+      if (uploadedFiles.length > 0) {
+        // Construct FormData for file uploads
+        const formData = new FormData();
+        formData.append("prompt", prompt || inputText);
+        uploadedFiles.forEach((file) => {
+          formData.append("document", file);
+        });
+        requestBody = formData;
+        contentType = "multipart/form-data";
+      } else {
+        // No files, send a simple JSON payload
+        requestBody = { prompt: prompt || inputText };
+        contentType = "application/json";
+      }
+
       const response = await axios.post(
         "https://gpt.aifagoon.com/api/prompt/",
-        { prompt: prompt || inputText }
+        requestBody,
+        {
+          headers: {
+            "Content-Type": contentType,
+          },
+        }
       );
 
       newChat.response = response.data.response;
       newChat.user_prompt = response.data.user_prompt;
+      newChat.uploadedFileNames = uploadedFiles.map((file) => file.name);
 
       setConversation((prev) => [...prev.slice(0, -1), newChat]);
       setScroll(true);
+
+      setUploadedFiles([]);
     } catch (error) {
       console.error(error);
     } finally {
       setIsProcessing(false);
-      setUploadedFiles([]);
     }
   };
-
   const startRecording = async () => {
     if (isSpeaking) {
       audioElement?.pause();
@@ -286,7 +312,7 @@ export default function ChatPage() {
       mediaRecorder.start();
       setIsRecording(true);
       setInputText("");
-      setMicActive(true); // Set micActive to true when recording starts
+      setMicActive(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
@@ -300,9 +326,9 @@ export default function ChatPage() {
     }
 
     mediaRecorder.stop();
-    setIsRecording(false); // Update recording status
+    setIsRecording(false);
     setInputText("");
-    setMicActive(false); // Set micActive to false when recording stops
+    setMicActive(false);
   };
   const handleCopyResponse = (response: string) => {
     navigator.clipboard.writeText(response);
@@ -408,11 +434,7 @@ export default function ChatPage() {
           ) : (
             uploadedFiles.length === 0 && (
               <label htmlFor="file-upload" className="cursor-pointer">
-                <AddIcon
-                  width={isSmallDevice ? "16" : "24"}
-                  className="cursor-pointer"
-                  height={isSmallDevice ? "16" : "24"}
-                />
+                <AddIcon />
               </label>
             )
           )}

@@ -100,9 +100,11 @@ export default function ChatPage() {
   };
 
   const toggleMic = () => {
-    setMicActive((prev) => !prev);
-    setInputText("");
-    setUploadedFiles([]);
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
   };
 
   const handleRemoveFile = (index: number) => {
@@ -197,7 +199,11 @@ export default function ChatPage() {
   };
   const handleSubmit = async (prompt?: string) => {
     setInputText("");
-    if (!prompt && inputText.trim() === "") return;
+
+    if (!prompt && inputText.trim() === "" && uploadedFiles.length === 0) {
+      toast.error("Please enter a message or upload a file.");
+      return;
+    }
 
     const newChat: ChatMessage = {
       prompt: prompt || inputText,
@@ -211,24 +217,48 @@ export default function ChatPage() {
     try {
       setIsProcessing(true);
 
+      // Determine the request body based on whether files are present
+      let requestBody;
+      let contentType;
+      if (uploadedFiles.length > 0) {
+        // Construct FormData for file uploads
+        const formData = new FormData();
+        formData.append("prompt", prompt || inputText);
+        uploadedFiles.forEach((file) => {
+          formData.append("document", file);
+        });
+        requestBody = formData;
+        contentType = "multipart/form-data";
+      } else {
+        // No files, send a simple JSON payload
+        requestBody = { prompt: prompt || inputText };
+        contentType = "application/json";
+      }
+
       const response = await axios.post(
         "https://gpt.aifagoon.com/fagoongpt/v2/",
-        { prompt: prompt || inputText }
+        requestBody,
+        {
+          headers: {
+            "Content-Type": contentType,
+          },
+        }
       );
 
       newChat.response = response.data.response;
       newChat.user_prompt = response.data.user_prompt;
+      newChat.uploadedFileNames = uploadedFiles.map((file) => file.name);
 
       setConversation((prev) => [...prev.slice(0, -1), newChat]);
       setScroll(true);
+
+      setUploadedFiles([]);
     } catch (error) {
       console.error(error);
     } finally {
       setIsProcessing(false);
-      setUploadedFiles([]);
     }
   };
-
   const startRecording = async () => {
     if (isSpeaking) {
       audioElement?.pause();
@@ -254,7 +284,7 @@ export default function ChatPage() {
           formData.append("file", blob, "recorded_audio.mp3");
 
           const response = await axios.post(
-            "https://gpt.aifagoon.com/fagoongpt/v2/",
+            "https://gpt.aifagoon.com/api/prompt/",
             formData
           );
 
@@ -283,6 +313,7 @@ export default function ChatPage() {
       mediaRecorder.start();
       setIsRecording(true);
       setInputText("");
+      setMicActive(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
@@ -298,8 +329,8 @@ export default function ChatPage() {
     mediaRecorder.stop();
     setIsRecording(false);
     setInputText("");
+    setMicActive(false);
   };
-
   const handleCopyResponse = (response: string) => {
     navigator.clipboard.writeText(response);
     toast.success("Response copied to clipboard");
@@ -356,7 +387,7 @@ export default function ChatPage() {
                 )}
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
-                    <span className="font-bold">FagoonGPT v2.0:</span>
+                    <span className="font-bold">FagoonGPT:</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
                       {chat.response}
                     </span>
@@ -404,11 +435,7 @@ export default function ChatPage() {
           ) : (
             uploadedFiles.length === 0 && (
               <label htmlFor="file-upload" className="cursor-pointer">
-                <AddIcon
-                  width={isSmallDevice ? "16" : "24"}
-                  className="cursor-pointer"
-                  height={isSmallDevice ? "16" : "24"}
-                />
+                <AddIcon />
               </label>
             )
           )}
