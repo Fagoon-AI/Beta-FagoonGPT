@@ -80,8 +80,7 @@ export default function Navbar() {
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
-          onMouseEnter={toggleDropDown}
-          onMouseLeave={toggleDropDown}
+          onClick={toggleDropDown}
         >
           <span className="pr-2">FagoonGPT v1.0</span>
           <ChevronDown />
@@ -92,8 +91,6 @@ export default function Navbar() {
             ref={dropdownRef}
             className="absolute left-12 md:left-16 top-full mt-3 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
             style={{ width: "max-content" }}
-            onMouseEnter={toggleDropDown}
-            onMouseLeave={toggleDropDown}
           >
             <li
               className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
@@ -112,6 +109,27 @@ export default function Navbar() {
                       style={{ fontSize: "12px" }}
                     >
                       Blazingly fast
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li
+              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
+              style={{ marginBottom: "4px", marginTop: "4px" }}
+            >
+              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
+                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
+                  <div className="mr-2">
+                    <Sparkle />
+                  </div>
+                  <div style={{ width: "calc(100% - 8px)" }}>
+                    <h4 className="text-sm">FagoonGPT v3.0</h4>
+                    <p
+                      className="text-sm text-gray-400"
+                      style={{ fontSize: "12px" }}
+                    >
+                      Extra fast
                     </p>
                   </div>
                 </div>
@@ -159,6 +177,7 @@ export default function Navbar() {
                 <span style={{ fontWeight: 100, fontSize: "small" }}>
                   {title}
                 </span>
+                <span>{title}</span>
                 {hoveredIndex === index && (
                   <div className="ml-2 text-gray-400 hover:text-white">
                     <Trash />
@@ -171,12 +190,24 @@ export default function Navbar() {
       </div>{" "}
       <div
         className="fixed top-4 right-0 px-4"
-        className="fixed top-4 right-0 px-4"
         onMouseEnter={() => setHoveredIndex(1)}
         onMouseLeave={() => setHoveredIndex(null)}
-        onMouseEnter={toggleuserprofile}
-        onMouseLeave={toggleuserprofile}
       >
+        <div className="absolute bottom-0 w-full py-2 px-4 mt-4   bg-gray-900 ">
+          <div className="flex items-center">
+            <div className="mr-2">
+              <Sparkle />
+            </div>
+            <div style={{ width: "calc(100% - 8px)" }}>
+              <h4 className="text-lg font-semibold">Upgrade Plan</h4>
+              <p className="text-sm text-gray-400" style={{ fontSize: "12px" }}>
+                Get FagoonGPT V2 and more
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>{" "}
+      <div className="fixed top-4 right-0 px-4">
         <img
           src={profile.src}
           style={{
