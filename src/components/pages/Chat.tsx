@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import PauseIcon from "../icons/PauseIcon";
 import PlayIcon from "../icons/PlayIcon";
 import ClipboardIcon from "../icons/CipboardIcon";
+import CopyIcon from "../icons/CopyIcon";
 import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
 import SendIcon from "../icons/SendIcon";
@@ -268,25 +269,54 @@ export default function ChatPage() {
                     <span>
                       {" "}
                       <ReactMarkdown
-                        components={{
-                          code({ node, inline, className, children, ...props }: CodeProps) {
-                            const match = /language-(\w+)/.exec(className || "");
-                            return !inline && match ? (
-                              <SyntaxHighlighter
-                                style={materialDark as any}  // Cast to 'any' to ensure type compatibility
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).replace(/\n$/, "")}
-                              </SyntaxHighlighter>
-                            ) : (
-                              <code className={className} {...props}>
-                                {children}
-                              </code>
-                            );
-                          },
-                        } as any}
+                        components={
+                          {
+                            code({
+                              node,
+                              inline,
+                              className,
+                              children,
+                              ...props
+                            }: CodeProps) {
+                              const match = /language-(\w+)/.exec(
+                                className || ""
+                              );
+                              const codeContent = String(children).replace(
+                                /\n$/,
+                                ""
+                              );
+
+                              const handleCopyCode = () => {
+                                navigator.clipboard.writeText(codeContent);
+                                toast.success("Code copied to clipboard");
+                              };
+
+                              return !inline && match ? (
+                                <div className="relative">
+                                  <SyntaxHighlighter
+                                    style={materialDark as any}
+                                    language={match[1]}
+                                    PreTag="div"
+                                    {...props}
+                                  >
+                                    {codeContent}
+                                  </SyntaxHighlighter>
+                                  <span className="absolute top-2 right-10 p-1  text-white text-sm ">Copy</span>
+                                  <button
+                                    onClick={handleCopyCode}
+                                    className="absolute top-2 right-2 p-1 bg-gray-800 rounded-full text-white text-sm focus:outline-none hover:bg-gray-600"
+                                  >
+                                    <CopyIcon />
+                                  </button>
+                                </div>
+                              ) : (
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                          } as any
+                        }
                       >
                         {chat.response.replace(/\n/g, "  \n")}
                       </ReactMarkdown>
