@@ -9,6 +9,7 @@ import ChatIcon from "../../components/icons/Chat";
 import ChevronDown from "../../components/icons/ChevronDown";
 import "./navstyle.css";
 import profile from "./profile.png";
+
 const demoChatTitles = [
   "Careers in USA: freelance",
   "Bishal Kharal: AI Engineer",
@@ -30,6 +31,7 @@ export default function Navbar() {
   const [showDropDown, setShowDropDown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showuserprofile, setShowuserprofile] = useState(false);
+
   useEffect(() => {
     if (!isMenuOpen) {
       const timer = setTimeout(() => {
@@ -61,11 +63,13 @@ export default function Navbar() {
   };
 
   const toggleDropDown = () => {
-    setShowDropDown(!showDropDown);
+    setShowDropDown((prev) => !prev);
   };
+
   const toggleuserprofile = () => {
-    setShowuserprofile(!showuserprofile);
+    setShowuserprofile((prev) => !prev);
   };
+
   return (
     <div className="relative h-100vh">
       <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
@@ -76,7 +80,8 @@ export default function Navbar() {
           className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
           onMouseEnter={() => setHoveredIndex(1)}
           onMouseLeave={() => setHoveredIndex(null)}
-          onClick={toggleDropDown}
+          onMouseEnter={toggleDropDown}
+          onMouseLeave={toggleDropDown}
         >
           <span className="pr-2">FagoonGPT v1.0</span>
           <ChevronDown />
@@ -85,8 +90,10 @@ export default function Navbar() {
         {showDropDown && (
           <div
             ref={dropdownRef}
-            className="absolute left-12 md:left-16 top-full mt-5 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
+            className="absolute left-12 md:left-16 top-full mt-3 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
             style={{ width: "max-content" }}
+            onMouseEnter={toggleDropDown}
+            onMouseLeave={toggleDropDown}
           >
             <li
               className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
@@ -162,7 +169,14 @@ export default function Navbar() {
           </ul>
         </div>
       </div>{" "}
-      <div className="fixed top-4 right-0 px-4">
+      <div
+        className="fixed top-4 right-0 px-4"
+        className="fixed top-4 right-0 px-4"
+        onMouseEnter={() => setHoveredIndex(1)}
+        onMouseLeave={() => setHoveredIndex(null)}
+        onMouseEnter={toggleuserprofile}
+        onMouseLeave={toggleuserprofile}
+      >
         <img
           src={profile.src}
           style={{
