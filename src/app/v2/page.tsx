@@ -313,7 +313,7 @@ export default function ChatPage() {
 
   const iconSize = isSmallDevice ? "24" : "32";
   return (
-    <div className="mt-14" style={{ fontFamily: "Poppins" }}>
+    <div className="mt-14">
       <Navbar />
       <main className={`flex flex-col justify-between h-100dvh`}>
         {conversation.length === 0 ? (
@@ -329,37 +329,26 @@ export default function ChatPage() {
                 {chat.audioBlob && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">You:</span>
-                    <span style={{ fontWeight: 100, fontSize: "small" }}>
-                      {chat.user_prompt}
-                    </span>
+                    <span>{chat.user_prompt}</span>
                   </div>
                 )}
                 {chat.prompt && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">You:</span>
-                    <span style={{ fontWeight: 100, fontSize: "small" }}>
-                      {chat.prompt}
-                    </span>
+                    <span>{chat.prompt}</span>
                   </div>
                 )}
                 {chat.prompt === "Uploaded Files:" && (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     {uploadedFiles.map((file, i) => (
-                      <span
-                        key={i}
-                        style={{ fontWeight: 100, fontSize: "small" }}
-                      >
-                        {file.name}
-                      </span>
+                      <span key={i}>{file.name}</span>
                     ))}
                   </div>
                 )}
                 {chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">FagoonGPT v2.0:</span>
-                    <span style={{ fontWeight: 100, fontSize: "small" }}>
-                      {chat.response}
-                    </span>
+                    <span>{chat.response}</span>
 
                     <div className="flex items-center gap-2">
                       <button

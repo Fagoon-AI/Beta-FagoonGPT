@@ -170,9 +170,7 @@ export default function Navbar() {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                <span style={{ fontWeight: 100, fontSize: "small" }}>
-                  {title}
-                </span>
+                <span>{title}</span>
                 {hoveredIndex === index && (
                   <div className="ml-2 text-gray-400 hover:text-white">
                     <Trash />
