@@ -9,3 +9,23 @@
   border-radius: 8px;
   padding: 10px;
 }
+/* navstyle.css */
+body {
+  font-family: Arial, sans-serif; /* Clean, readable font */
+}
+
+.navbar {
+  background-color: #333; /* Dark background for minimalism */
+  color: white; /* High contrast text color */
+}
+
+.nav-item {
+  padding: 15px 25px; /* Consistent spacing */
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background-color: #555; /* Subtle hover effect */
+}
+
+/* Additional styles for icons and other elements can be added here */

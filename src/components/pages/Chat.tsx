@@ -7,6 +7,7 @@ import Navbar from "../ui/nav";
 import axios from "axios";
 import { useSmallDevices } from "@/hooks/useSmallDevices";
 import { toast } from "sonner";
+import PdfIcon from "../icons/Pdf";
 import PauseIcon from "../icons/PauseIcon";
 import SoundIcon from "../icons/SoundIcon";
 import RemoveIcon from "../icons/Remove";
@@ -17,6 +18,7 @@ import PulseIcon from "../icons/Pulse";
 import { cn } from "@/lib/utils";
 import SendIcon from "../icons/SendIcon";
 import "./ChatPage.module.css";
+import AddFileIcon from "../icons/AddFile";
 import LoadingAnimation from "../ui/loading";
 export interface ChatMessage {
   prompt: string;
@@ -57,7 +59,6 @@ export default function ChatPage() {
   const [audioLevel, setAudioLevel] = useState(0);
   const [showWave, setShowWave] = useState(false);
   const [micActive, setMicActive] = useState(false);
-
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -269,13 +270,10 @@ export default function ChatPage() {
       mediaRecorder.ondataavailable = (event) => {
         chunks.push(event.data);
       };
-
       mediaRecorder.onstop = async () => {
         const blob = new Blob(chunks, { type: "audio/mp3" });
-
         try {
           setIsProcessing(true);
-
           const formData = new FormData();
           formData.append("file", blob, "recorded_audio.mp3");
 
@@ -283,7 +281,6 @@ export default function ChatPage() {
             "https://gpt.aifagoon.com/api/prompt/",
             formData
           );
-
           const newChat: ChatMessage = {
             prompt: "",
             response: response.data.response,
@@ -291,7 +288,6 @@ export default function ChatPage() {
             audioBlob: blob,
             isAudioPlaying: false,
           };
-
           setConversation((prev) => [...prev, newChat]);
           setScroll(true);
 
@@ -362,7 +358,6 @@ export default function ChatPage() {
                     {chat.uploadedFileNames &&
                       chat.uploadedFileNames.length > 0 && (
                         <div className="flex flex-col gap-1 px-4 rounded-lg">
-                          <span className="font-bold">Uploaded Files:</span>
                           {chat.uploadedFileNames.map((fileName, i) => (
                             <span
                               key={i}
@@ -386,28 +381,35 @@ export default function ChatPage() {
                         <div
                           className="flex flex-col gap-1 px-4 rounded-lg"
                           style={{
-                            border: "1px solid grey",
-                            padding: "8px",
-                            width: "30%",
+                            padding: "2px",
+                            maxWidth: "30%",
+                            border: "1px solid #393938",
+                            overflowX: "auto",
+                            marginTop: "10px",
                           }}
                         >
-                          <span
-                            className="font-bold"
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#D3D3D3",
-                            }}
-                          >
-                            Source:
-                          </span>
                           {chat.uploadedFileNames.map((fileName, i) => (
-                            <span
+                            <div
                               key={i}
-                              style={{ fontWeight: 100, fontSize: "small" }}
+                              style={{ display: "flex", alignItems: "center" }}
                             >
-                              {fileName}
-                            </span>
+                              <PdfIcon />
+                              <span
+                                style={{
+                                  fontWeight: 100,
+                                  fontSize: "12px",
+                                  marginLeft: "5px",
+                                  maxWidth: "100%",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                                }}
+                              >
+                                {fileName}
+                                <p style={{ color: "#9B9A9A" }}> PDF</p>
+                              </span>
+                            </div>
                           ))}
                         </div>
                       )}
@@ -475,39 +477,57 @@ export default function ChatPage() {
           ) : (
             uploadedFiles.length === 0 && (
               <label htmlFor="file-upload" className="cursor-pointer">
-                <AddIcon />
+                <FilesIcon />
               </label>
             )
           )}
-
-          <input
-            id="file-upload"
-            type="file"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
-          {!micActive && !isRecording && uploadedFiles.length > 0 && (
-            <div className="rounded-lg p-2 max-w-[200px] max-h-[100px] overflow-hidden border border-gray-300">
-              {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <RemoveIcon onClick={() => handleRemoveFile(index)} />
-                  <span
-                    className="file-name"
-                    style={{
-                      fontWeight: 400,
-                      fontSize: "14px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {file.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
+          <div
+            className={`upload-container ${
+              isFileUploading ? "uploading-animation" : ""
+            }`}
+          >
+            <input
+              id="file-upload"
+              type="file"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            {!micActive && !isRecording && uploadedFiles.length > 0 && (
+              <div
+                style={{ border: "1px solid #393938", position: "relative" }}
+                className="rounded-lg p-1  pr-5 max-w-[150px] max-h-[100px] overflow-hidden"
+              >
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <AddFileIcon />
+                    <span
+                      className="file-name"
+                      style={{
+                        fontWeight: 400,
+                        fontSize: "12px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {file.name}
+                      <br />
+                      <p style={{ color: "#42464E", fontSize: "10px" }}>PDF</p>
+                    </span>
+                    <RemoveIcon
+                      onClick={() => handleRemoveFile(index)}
+                      style={{
+                        position: "absolute",
+                        top: "-1px",
+                        right: "-1px",
+                        cursor: "pointer",
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <input
             className="flex-1 bg-transparent placeholder-white focus:outline-none md:ml-5 ml-2 text-xs md:text-sm"
             placeholder={isRecording ? "" : "What are you looking for?"}

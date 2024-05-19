@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { redirect, useRouter } from "next/navigation";
 import HamburgerIcon from "../../components/icons/HamburgerIcon";
 import { LogOutIcon, X } from "lucide-react";
@@ -132,127 +132,155 @@ export default function Navbar() {
   };
 
   return (
-    <div className="relative h-100vh">
-      <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
-        {/* <div onClick={toggleMenu}>
+    <Fragment>
+      <div className="relative h-100vh">
+        <div className="fixed top-4 left-0 z-10 w-full flex items-center px-4">
+          {/* <div onClick={toggleMenu}>
           <HamburgerIcon isMenuOpen={isMenuOpen} />
         </div> */}
-        <div
-          className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
-          onMouseEnter={toggleDropDown}
-          onMouseLeave={toggleDropDown}
-        >
-          <span className="pr-2">FagoonGPT v1.0</span>
-          <ChevronDown />
-        </div>
-
-        {showDropDown && (
           <div
-            ref={dropdownRef}
-            className="absolute left-12 md:left-16 top-full mt-3 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
-            style={{ width: "max-content" }}
+            className={`absolute left-12 md:left-16 text-xl mt-0 flex items-center hovered-div`}
             onMouseEnter={toggleDropDown}
             onMouseLeave={toggleDropDown}
           >
-            <li
-              className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
-              style={{ marginBottom: "4px", marginTop: "4px" }}
-              onClick={() => router.push("/v2")}
-            >
-              <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
-                <div className="flex items-center hover:bg-gray-700 rounded-md p-2">
-                  <div className="mr-2">
-                    <Sparkle />
-                  </div>
-                  <div style={{ width: "calc(100% - 8px)" }}>
-                    <h4 className="text-sm">FagoonGPT v2.0</h4>
-                    <p
-                      className="text-sm text-gray-400"
-                      style={{ fontSize: "12px" }}
-                    >
-                      Blazingly fast
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </li>
+            <span className="pr-2">FagoonGPT v1.0</span>
+            <ChevronDown />
           </div>
-        )}
-      </div>
-      <div
-        className="fixed top-0 left-0 z-10 w-64 h-full bg-gray-800 transform transition-transform duration-500"
-        style={{
-          transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
-          opacity: animation ? 1 : 0,
-        }}
-      >
-        <div className="flex items-center justify-between h-16 bg-gray-900">
-          <h1 className="text-xl p-4 text-white">FagoonGPT</h1>
-          <button
-            className="text-white p-4 focus:outline-none"
-            onClick={toggleMenu}
-          >
-            <Collapse></Collapse>{" "}
-          </button>
-        </div>
-        <div className="overflow-y-auto" style={{ maxHeight: "75vh" }}>
-          <ul className="py-2">
-            <li
-              className="px-4 py-2 text-white flex items-center justify-between "
-              style={{ marginBottom: "8px", marginTop: "8px" }}
-            >
-              <button className="flex items-center text-white px-3 py-1 bg-gray-700 rounded-md hover:bg-gray-600 transition duration-300 w-full">
-                <ChatIcon /> <span className="ml-2">New Chat</span>
-              </button>
-            </li>
 
-            {demoChatTitles.map((title, index) => (
-              <li
-                key={index}
-                className={`px-4 py-2 text-white cursor-pointer flex items-center justify-between ${
-                  hoveredIndex === index ? "rounded-lg hover:bg-gray-700" : ""
-                }`}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                <span style={{ fontWeight: 100, fontSize: "small" }}>
-                  {title}
-                </span>
-                {hoveredIndex === index && (
-                  <div className="ml-2 text-gray-400 hover:text-white">
-                    <Trash />
+          {showDropDown && (
+            <div
+              ref={dropdownRef}
+              className="absolute left-12 md:left-16 top-full mt-3 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
+              style={{ width: "max-content" }}
+              onMouseEnter={toggleDropDown}
+              onMouseLeave={toggleDropDown}
+            >
+              <div className="flex justify-end">
+                <li
+                  className="px-4 py-1 text-white flex items-center justify-between cursor-pointer"
+                  style={{ marginBottom: "4px", marginTop: "4px" }}
+                  onClick={() => router.push("/v2")}
+                >
+                  <div className="py-1 px-1 mt-1 bg-2E2F rounded-md">
+                    <div className="flex items-center  rounded-md p-2">
+                      <div style={{ width: "calc(100% - 8px)" }}>
+                        <h4 className="text-sm">v2.0</h4>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                </li>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-      <div className="fixed top-4 right-0 px-4 flex flex-column ...">
-        <div onClick={toggleMenu} style={{ marginRight: "20px" }}>
-          <HistoryIcon isMenuOpen={isMenuOpen} />
-        </div>
+        {isMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-9"
+            onClick={(e) => e.stopPropagation()}
+          ></div>
+        )}
         <div
+          className="fixed top-0 left-0 z-10 w-64 h-full bg-gray-800 transform transition-transform duration-500"
           style={{
-            // border: "1px solid grey",
-            padding: "2px",
-            display: "flex",
-            flexDirection: "row",
+            transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
+            opacity: animation ? 1 : 0,
           }}
-          onMouseEnter={toggleuserprofile}
-          onMouseLeave={toggleuserprofile}
         >
-          <ProfileIcon></ProfileIcon> <p> {full_name}</p>
+          <div className="flex items-center justify-between h-16 bg-gray-900">
+            <h1 className="text-xl p-4 bg-gradient-to-r from-[#4285F4] via-[#9B72CB] via-[#D96570] via-[#D96570] via-[#9B72CB] via-[#4285F4] via-[#9B72CB] via-[#D96570] to-[#131314] bg-clip-text text-transparent">
+              FagoonGPT
+            </h1>
+            <button
+              className="text-white p-4 focus:outline-none"
+              onClick={toggleMenu}
+            >
+              <Collapse></Collapse>{" "}
+            </button>
+          </div>
+          <div className="overflow-y-auto" style={{ maxHeight: "75vh" }}>
+            <ul className="py-2">
+              <li
+                className="px-4 py-2 text-white flex items-center justify-between "
+                style={{ marginBottom: "8px", marginTop: "8px" }}
+              >
+                <button className="flex items-center text-white px-3 py-1 bg-gray-700 rounded-md hover:bg-gray-600 transition duration-300 w-full">
+                  <ChatIcon /> <span className="ml-2">New Chat</span>
+                </button>
+              </li>
+
+              {demoChatTitles.map((title, index) => (
+                <li
+                  key={index}
+                  className={`px-4 py-2 text-white cursor-pointer flex items-center justify-between ${
+                    hoveredIndex === index ? "rounded-lg hover:bg-gray-700" : ""
+                  }`}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <span
+                    style={{
+                      fontWeight: 100,
+                      fontSize: "small",
+                      color: "#BBC1C5",
+                    }}
+                  >
+                    {title}
+                  </span>
+
+                  {hoveredIndex === index && (
+                    <div className="ml-2 text-gray-400 hover:text-white">
+                      <Trash />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        {showuserprofile && (
+        <div className="fixed top-4 right-0 px-4 flex flex-col">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            {!isMenuOpen && (
+              <div onClick={toggleMenu} style={{ marginRight: "20px" }}>
+                <HistoryIcon isMenuOpen={isMenuOpen} />
+              </div>
+            )}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+              }}
+              onMouseEnter={toggleuserprofile}
+              onMouseLeave={toggleuserprofile}
+            >
+              <ProfileIcon />
+              <p>{full_name}</p>
+            </div>
+          </div>
+          {/* {showuserprofile && (
           <div
             ref={dropdownRef}
-            className="absolute right-2 mt-2  bg-gray-800 rounded-md shadow-lg transition-all duration-300"
+            className="absolute right-2 mt-2 bg-gray-800 rounded-md shadow-lg transition-all duration-300"
+            style={{ width: "120px", padding: "8px" }} // Reduced width and padding for a smaller box
           >
-            {/* <div>{full_name !== "" && <p> {full_name.split(" ")[0]}</p>}</div> */}
+            <div
+              className="cursor-pointer text-gray-300 hover:text-white text-center"
+              onClick={handleLogout}
+            >
+              <LogOutIcon size={14} className="block mx-auto mb-1" /> Logout
+            </div>
           </div>
-        )}{" "}
-      </div>
-    </div>
+        )} */}
+        </div>
+      </div>{" "}
+    </Fragment>
   );
 }

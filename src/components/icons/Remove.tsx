@@ -2,9 +2,10 @@ import React from "react";
 
 interface RemoveIconProps {
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
-const RemoveIcon: React.FC<RemoveIconProps> = ({ onClick }) => {
+const RemoveIcon: React.FC<RemoveIconProps> = ({ onClick, style }) => {
   return (
     <svg
       fill="none"
@@ -12,6 +13,7 @@ const RemoveIcon: React.FC<RemoveIconProps> = ({ onClick }) => {
       height="1em"
       width="1em"
       onClick={onClick}
+      style={style}
     >
       <path fill="currentColor" d="M8 11a1 1 0 100 2h8a1 1 0 100-2H8z" />
       <path

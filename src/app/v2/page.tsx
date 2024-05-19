@@ -217,11 +217,9 @@ export default function ChatPage() {
     try {
       setIsProcessing(true);
 
-      // Determine the request body based on whether files are present
       let requestBody;
       let contentType;
       if (uploadedFiles.length > 0) {
-        // Construct FormData for file uploads
         const formData = new FormData();
         formData.append("prompt", prompt || inputText);
         uploadedFiles.forEach((file) => {
@@ -230,7 +228,6 @@ export default function ChatPage() {
         requestBody = formData;
         contentType = "multipart/form-data";
       } else {
-        // No files, send a simple JSON payload
         requestBody = { prompt: prompt || inputText };
         contentType = "application/json";
       }

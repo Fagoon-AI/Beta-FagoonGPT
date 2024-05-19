@@ -49,3 +49,34 @@
 .text-custom-color {
   color: rgb(81, 83, 86);
 }
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.uploading-animation {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px; /* Adjust size as needed */
+  height: 40px; /* Adjust size as needed */
+  border: 4px solid #ccc; /* Border color */
+  border-top-color: #3498db; /* Spinning color */
+  border-radius: 50%;
+  animation: spin 1s linear infinite; /* Apply the spin animation */
+}
+/* Add this CSS to your ChatPage.module.css or equivalent CSS file */
+.remove-icon-container {
+  position: relative;
+}
+
+.remove-icon {
+  position: absolute;
+  top: -20px;
+  right: -10px;
+  cursor: pointer;
+}
