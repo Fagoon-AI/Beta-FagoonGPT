@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
 import Showcase from "./showcase";
+import React, { useState, useEffect, useRef } from "react";
 import FilesIcon from "../icons/Files";
 import MicIcon from "../icons/Mic";
 import SearchIcon from "../icons/Search";
@@ -23,6 +23,7 @@ import LoadingAnimation from "../ui/loading";
 export interface ChatMessage {
   prompt: string;
   response: string | null;
+  imageUrl?: string;
   user_prompt?: string;
   audioBlob?: Blob | null;
   isAudioPlaying: boolean;
@@ -140,13 +141,17 @@ export default function ChatPage() {
   };
 
   const setSpeakingTrue = (index: number) => {
-    setConversation((prev) =>
-      prev.map((chat, i) => ({ ...chat, isAudioPlaying: i === index }))
+    setConversation((prev: any) =>
+      prev.map((chat: any, i: any) => ({
+        ...chat,
+        isAudioPlaying: i === index,
+      }))
     );
     setScroll(false);
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputText(e.target.value);
+    const input = e.target.value;
+    setInputText(input);
   };
 
   const handlePlayResponse = async (chat: ChatMessage, index: number) => {
@@ -198,15 +203,16 @@ export default function ChatPage() {
     }
   };
   const handleSubmit = async (prompt?: string) => {
+    const input = prompt || inputText;
     setInputText("");
 
-    if (!prompt && inputText.trim() === "" && uploadedFiles.length === 0) {
+    if (!input && uploadedFiles.length === 0) {
       toast.error("Please enter a message or upload a file.");
       return;
     }
 
     const newChat: ChatMessage = {
-      prompt: prompt || inputText,
+      prompt: input,
       response: null,
       isAudioPlaying: false,
     };
@@ -217,34 +223,47 @@ export default function ChatPage() {
     try {
       setIsProcessing(true);
 
-      let requestBody;
-      let contentType;
-      if (uploadedFiles.length > 0) {
-        const formData = new FormData();
-        formData.append("prompt", prompt || inputText);
-        uploadedFiles.forEach((file) => {
-          formData.append("document", file);
-        });
-        requestBody = formData;
-        contentType = "multipart/form-data";
+      if (input.toLowerCase().includes("imagine a photo")) {
+        const response = await axios.post(
+          "https://gpt.aifagoon.com/imagine/a/photo",
+          { prompt: input },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        newChat.imageUrl = response.data.imageUrl;
       } else {
-        requestBody = { prompt: prompt || inputText };
-        contentType = "application/json";
-      }
-
-      const response = await axios.post(
-        "https://gpt.aifagoon.com/api/prompt/",
-        requestBody,
-        {
-          headers: {
-            "Content-Type": contentType,
-          },
+        let requestBody;
+        let contentType;
+        if (uploadedFiles.length > 0) {
+          const formData = new FormData();
+          formData.append("prompt", input);
+          uploadedFiles.forEach((file) => {
+            formData.append("document", file);
+          });
+          requestBody = formData;
+          contentType = "multipart/form-data";
+        } else {
+          requestBody = { prompt: input };
+          contentType = "application/json";
         }
-      );
 
-      newChat.response = response.data.response;
-      newChat.user_prompt = response.data.user_prompt;
-      newChat.uploadedFileNames = uploadedFiles.map((file) => file.name);
+        const response = await axios.post(
+          "https://gpt.aifagoon.com/api/prompt/",
+          requestBody,
+          {
+            headers: {
+              "Content-Type": contentType,
+            },
+          }
+        );
+
+        newChat.response = response.data.response;
+        newChat.user_prompt = response.data.user_prompt;
+        newChat.uploadedFileNames = uploadedFiles.map((file) => file.name);
+      }
 
       setConversation((prev) => [...prev.slice(0, -1), newChat]);
       setScroll(true);
@@ -256,6 +275,7 @@ export default function ChatPage() {
       setIsProcessing(false);
     }
   };
+
   const startRecording = async () => {
     if (isSpeaking) {
       audioElement?.pause();
@@ -427,7 +447,16 @@ export default function ChatPage() {
                     ))}
                   </div>
                 )}
-                {chat.response ? (
+                {chat.imageUrl ? (
+                  <div className="flex flex-col gap-1 px-4 rounded-lg">
+                    <span className="font-bold">FagoonGPT:</span>
+                    <img
+                      src={chat.imageUrl}
+                      alt="Generated"
+                      style={{ maxWidth: "100%", height: "auto" }} // Ensure the image takes up space based on its aspect ratio
+                    />
+                  </div>
+                ) : chat.response ? (
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">FagoonGPT:</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
