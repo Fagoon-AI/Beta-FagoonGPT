@@ -460,7 +460,12 @@ export default function ChatPage() {
                   <div className="flex flex-col gap-1 px-4 rounded-lg">
                     <span className="font-bold">FagoonGPT:</span>
                     <span style={{ fontWeight: 100, fontSize: "small" }}>
-                      {chat.response}
+                      {chat.response}{" "}
+                      <img
+                        src={chat.imageUrl}
+                        alt="Generated"
+                        style={{ maxWidth: "100%", height: "auto" }} // Ensure the image takes up space based on its aspect ratio
+                      />
                     </span>
 
                     <div className="flex items-center gap-2">
